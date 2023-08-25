@@ -50,11 +50,12 @@ function getCookiesForTokenResponse(tokenResponse: any, config: OAuthAgentConfig
     }
 
     if (tokenResponse.id_token) {
-        const idTokenCookieOptions = {
-            ...config.cookieOptions,
-            path: config.endpointsPrefix + '/claims'
-        }
-        cookies.push(getEncryptedCookie(idTokenCookieOptions, tokenResponse.id_token, getIDCookieName(config.cookieNamePrefix), config.encKey))
+        // TODO: see if we can limit access to a path
+        // const idTokenCookieOptions = {
+        //     ...config.cookieOptions,
+        //     path: config.endpointsPrefix + '/claims'
+        // }
+        cookies.push(getEncryptedCookie(config.cookieOptions, tokenResponse.id_token, getIDCookieName(config.cookieNamePrefix), config.encKey))
     }
 
     return cookies

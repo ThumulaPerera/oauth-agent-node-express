@@ -16,10 +16,17 @@
 
 import OAuthAgentConfiguration from './oauthAgentConfiguration'
 
-function getLogoutURL(config: OAuthAgentConfiguration): string {
-    const postLogoutRedirectUriParam = config.postLogoutRedirectURI ? "&post_logout_redirect_uri=" + encodeURIComponent(config.postLogoutRedirectURI) : ""
+function getLogoutURL(config: OAuthAgentConfiguration, idToken: string = ""): string {
 
-    return config.logoutEndpoint + "?client_id=" + encodeURIComponent(config.clientID) + postLogoutRedirectUriParam
+    let urlObj = new URL(config.logoutEndpoint)
+    if (config.oidcPostLogoutRedirectURI) {
+        urlObj.searchParams.set("post_logout_redirect_uri", config.oidcPostLogoutRedirectURI)
+    }
+    if (idToken) {
+        urlObj.searchParams.set("id_token_hint", idToken)
+    }
+
+    return urlObj.toString()
 }
 
 export default getLogoutURL

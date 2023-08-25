@@ -28,7 +28,7 @@ export default class OAuthAgentConfiguration {
     public clientID: string
     public clientSecret: string
     public redirectUri: string
-    public postLogoutRedirectURI: string
+    public oidcPostLogoutRedirectURI: string
     public scope: string
 
     // Authorization Server settings
@@ -58,7 +58,7 @@ export default class OAuthAgentConfiguration {
         clientID: string,
         clientSecret: string,
         redirectUri: string,
-        postLogoutRedirectURI: string,
+        oidcPostLogoutRedirectURI: string,
         scope: string,
         issuer: string,
         authorizeEndpoint: string,
@@ -82,7 +82,7 @@ export default class OAuthAgentConfiguration {
         this.clientID = clientID
         this.clientSecret = clientSecret
         this.redirectUri = redirectUri
-        this.postLogoutRedirectURI = postLogoutRedirectURI
+        this.oidcPostLogoutRedirectURI = oidcPostLogoutRedirectURI
         this.scope = scope
 
         this.cookieNamePrefix = cookieNamePrefix ? cookieNamePrefix : "oauthagent"

@@ -16,7 +16,7 @@
 
 import * as express from 'express'
 import {config} from '../config'
-import {getATCookieName, getCookiesForUnset, getLogoutURL, ValidateRequestOptions} from '../lib'
+import {getATCookieName, getCookiesForUnset, getLogoutURL, ValidateRequestOptions, decryptCookie, getIDCookieName, getIDTokenClaims} from '../lib'
 import {InvalidCookieException} from '../lib/exceptions'
 import validateExpressRequest from '../validateExpressRequest'
 import {asyncCatch} from '../middleware/exceptionMiddleware';
@@ -25,7 +25,38 @@ class LogoutController {
     public router = express.Router()
 
     constructor() {
+        this.router.get('/', asyncCatch(this.startLogoutUser))
+        this.router.get('/callback', asyncCatch(this.handlePostLogout))
         this.router.post('/', asyncCatch(this.logoutUser))
+    }
+
+    startLogoutUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+        // Check for an allowed origin and the presence of a CSRF token
+        // const options = new ValidateRequestOptions()
+        // validateExpressRequest(req, options)
+
+        if (req.cookies && req.cookies[getATCookieName(config.cookieNamePrefix)] && req.cookies[getIDCookieName(config.cookieNamePrefix)]) {
+
+            const idTokenCookieName = getIDCookieName(config.cookieNamePrefix)
+            const idToken = decryptCookie(config.encKey, req.cookies[idTokenCookieName])
+
+            const logoutURL = getLogoutURL(config, idToken)
+            res.setHeader('Set-Cookie', getCookiesForUnset(config.cookieOptions, config.cookieNamePrefix))
+            res.setHeader('Location', logoutURL)
+            res.status(302).send()
+
+        } else {
+            const error = new InvalidCookieException()
+            error.logInfo = 'No auth cookie was supplied in a logout call'
+            throw error
+        }
+    }
+
+    handlePostLogout = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+        res.setHeader('Location', config.postLogoutRedirectUrl)
+        res.status(302).send()
     }
 
     logoutUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
