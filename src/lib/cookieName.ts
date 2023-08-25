@@ -14,10 +14,10 @@
  *  limitations under the License.
  */
 
-const getTempLoginDataCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '-login'
-const getAuthCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '-auth'
-const getATCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '-at'
-const getIDCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '-id'
-const getCSRFCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '-csrf'
+const getTempLoginDataCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_login'
+const getAuthCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_auth'
+const getATCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_at'
+const getIDCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_id'
+const getCSRFCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_csrf'
 
 export {getTempLoginDataCookieName, getATCookieName, getAuthCookieName, getIDCookieName, getCSRFCookieName}
