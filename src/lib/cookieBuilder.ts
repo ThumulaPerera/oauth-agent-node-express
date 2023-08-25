@@ -22,10 +22,15 @@ import {getTempLoginDataCookieForUnset} from './pkce'
 
 const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
 
-function getCookiesForTokenResponse(tokenResponse: any, config: OAuthAgentConfiguration, unsetTempLoginDataCookie: boolean = false, csrfCookieValue?: string): string[] {
+function getCookiesForTokenResponse(tokenResponse: any, config: OAuthAgentConfiguration, unsetTempLoginDataCookie: boolean = false, csrfCookieValue?: string, encryptAccessToken: boolean = true): string[] {
+    
+    const accessTokenCookie = encryptAccessToken ? 
+        getEncryptedCookie(config.cookieOptions, tokenResponse.access_token, getATCookieName(config.cookieNamePrefix), config.encKey) 
+        : 
+        serialize(getATCookieName(config.cookieNamePrefix), tokenResponse.access_token, config.cookieOptions)
     
     const cookies = [
-        getEncryptedCookie(config.cookieOptions, tokenResponse.access_token, getATCookieName(config.cookieNamePrefix), config.encKey)
+        accessTokenCookie
     ]
 
     if (csrfCookieValue) {

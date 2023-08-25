@@ -106,7 +106,7 @@ class LoginController {
                 csrfToken = generateRandomString()
             }
 
-            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, true, csrfToken)
+            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, true, csrfToken, false)
             res.set('Set-Cookie', cookiesToSet)
             res.setHeader('Location', config.postLoginRedirectUrl)
         } else {
