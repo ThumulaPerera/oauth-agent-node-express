@@ -4,7 +4,7 @@
     "description": "An OAuth Agent that runs on the Express web server",
     "scripts": {
         "build": "rimraf dist && tsc",
-        "start": "ts-node src/server.ts",
+        "start": "eval $(cat .env) ts-node src/server.ts",
         "wiremock": "wiremock --root-dir test/integration --port 8443",
         "test": "mocha -r ts-node/register test/integration/**/*.ts"
     },

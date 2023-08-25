@@ -23,7 +23,7 @@ export const config: OAuthAgentConfiguration = {
     
     // Host settings
     port: process.env.PORT || '8080',
-    endpointsPrefix: '/oauth-agent',
+    endpointsPrefix: '/auth',
     serverCertPath: process.env.SERVER_CERT_P12_PATH || '',
     serverCertPassword: process.env.SERVER_CERT_P12_PASSWORD || '',
 
@@ -43,7 +43,7 @@ export const config: OAuthAgentConfiguration = {
         httpOnly: true,
         sameSite: true,
         secure: useSsl,
-        domain: process.env.COOKIE_DOMAIN || 'api.example.local',
+        // domain: process.env.COOKIE_DOMAIN || 'api.example.local',
         path: process.env.COOKIE_BASE_PATH || '/',
     } as CookieSerializeOptions,
 
@@ -53,4 +53,9 @@ export const config: OAuthAgentConfiguration = {
     logoutEndpoint: process.env.LOGOUT_ENDPOINT || 'http://login.example.local:8443/oauth/v2/oauth-session/logout',
     tokenEndpoint: process.env.TOKEN_ENDPOINT || 'http://login.example.local:8443/oauth/v2/oauth-token',
     userInfoEndpoint: process.env.USERINFO_ENDPOINT || 'http://login.example.local:8443/oauth/v2/oauth-userinfo',
+
+    // Post login, logout settings
+    postLoginRedirectUrl: process.env.POST_LOGIN_REDIRECT_URL || '/',
+    postLogoutRedirectUrl: process.env.POST_LOGOUT_REDIRECT_URL || '/',
+    postErrorRedirectUrl: process.env.POST_ERROR_REDIRECT_URL || '/error',
 }

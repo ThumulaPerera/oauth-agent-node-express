@@ -29,22 +29,102 @@ import {
     getATCookieName,
     generateRandomString,
 } from '../lib'
-import {config} from '../config'
+import { config } from '../config'
 import validateExpressRequest from '../validateExpressRequest'
-import {asyncCatch} from '../middleware/exceptionMiddleware';
+import { asyncCatch } from '../middleware/exceptionMiddleware';
 
 class LoginController {
     public router = express.Router()
 
     constructor() {
-        this.router.post('/start', asyncCatch(this.startLogin))
+        this.router.get('/start', asyncCatch(this.getStartLogin))
+        this.router.get('/callback', asyncCatch(this.handleCallback))
+        this.router.post('/start', asyncCatch(this.postStartLogin))
         this.router.post('/end', asyncCatch(this.handlePageLoad))
+    }
+
+    /*
+ * The SPA calls this endpoint to ask the OAuth Agent for the authorization request URL
+ */
+    getStartLogin = async (req: express.Request, res: express.Response) => {
+
+        // TODO: see if we need these validations in the redirection based flow
+        // const options = new ValidateRequestOptions()
+        // options.requireCsrfHeader = false
+        // validateExpressRequest(req, options)
+
+        const authorizationRequestData = createAuthorizationRequest(config, req.body)
+
+        const tempLoginDataCookieOptions = config.cookieOptions
+        tempLoginDataCookieOptions.sameSite = 'lax'
+
+        res.setHeader('Set-Cookie',
+            getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, tempLoginDataCookieOptions, config.cookieNamePrefix, config.encKey))
+        res.setHeader('Location', authorizationRequestData.authorizationRequestURL)
+        res.status(302).send()
+    }
+
+    handleCallback = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+        // TODO: see if we need these validations in the redirection based flow
+        // const options = new ValidateRequestOptions()
+        // options.requireCsrfHeader = false
+        // validateExpressRequest(req, options)
+
+        const currentUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+
+        const data = await handleAuthorizationResponse(currentUrl)
+
+        let csrfToken: string = ''
+
+        if (data.code && data.state) {
+
+            const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(config.cookieNamePrefix)] : undefined
+
+            const tokenResponse = await getTokenEndpointResponse(config, data.code, data.state, tempLoginData)
+            if (tokenResponse.id_token) {
+                validateIDtoken(config, tokenResponse.id_token)
+            }
+
+            csrfToken = generateRandomString()
+            const csrfCookie = req.cookies[getCSRFCookieName(config.cookieNamePrefix)]
+            if (csrfCookie) {
+
+                try {
+                    // Avoid setting a new value if the user opens two browser tabs and signs in on both
+                    csrfToken = decryptCookie(config.encKey, csrfCookie)
+
+                } catch (e) {
+
+                    // If the system has been redeployed with a new cookie encryption key, decrypting old cookies from the browser will fail
+                    // In this case generate a new CSRF token so that the SPA can complete its login without errors
+                    csrfToken = generateRandomString()
+                }
+            } else {
+
+                // Generate a new value otherwise
+                csrfToken = generateRandomString()
+            }
+
+            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, true, csrfToken)
+            res.set('Set-Cookie', cookiesToSet)
+            res.setHeader('Location', config.postLoginRedirectUrl)
+        } else {
+            // TODO: handle error
+        }
+
+        // if (csrfToken) {
+            // TODO: send this in a header OR see if we can set this as a non-httponly cookie
+            // responseBody.csrf = csrfToken
+        // }
+
+        res.status(302).send()
     }
 
     /*
      * The SPA calls this endpoint to ask the OAuth Agent for the authorization request URL
      */
-    startLogin = async (req: express.Request, res: express.Response) => {
+    postStartLogin = async (req: express.Request, res: express.Response) => {
 
         const options = new ValidateRequestOptions()
         options.requireCsrfHeader = false
@@ -68,17 +148,17 @@ class LoginController {
         const options = new ValidateRequestOptions()
         options.requireCsrfHeader = false
         validateExpressRequest(req, options)
-        
+
         const data = await handleAuthorizationResponse(req.body?.pageUrl)
-        
+
         let isLoggedIn = false
         let handled = false
         let csrfToken: string = ''
 
         if (data.code && data.state) {
-            
+
             const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(config.cookieNamePrefix)] : undefined
-            
+
             const tokenResponse = await getTokenEndpointResponse(config, data.code, data.state, tempLoginData)
             if (tokenResponse.id_token) {
                 validateIDtoken(config, tokenResponse.id_token)
@@ -87,7 +167,7 @@ class LoginController {
             csrfToken = generateRandomString()
             const csrfCookie = req.cookies[getCSRFCookieName(config.cookieNamePrefix)]
             if (csrfCookie) {
-                
+
                 try {
                     // Avoid setting a new value if the user opens two browser tabs and signs in on both
                     csrfToken = decryptCookie(config.encKey, csrfCookie)
@@ -110,7 +190,7 @@ class LoginController {
             isLoggedIn = true
 
         } else {
-            
+
             // During a page reload, return the existing anti forgery token
             isLoggedIn = !!(req.cookies && req.cookies[getATCookieName(config.cookieNamePrefix)])
             if (isLoggedIn) {
@@ -123,7 +203,7 @@ class LoginController {
             handled,
             isLoggedIn,
         } as any
-        
+
         if (csrfToken) {
             responseBody.csrf = csrfToken
         }

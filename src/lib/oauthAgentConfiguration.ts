@@ -45,6 +45,11 @@ export default class OAuthAgentConfiguration {
     public corsEnabled: boolean
     public cookieOptions: CookieSerializeOptions
 
+    // Post login, logout and error redirect URLs
+    public postLoginRedirectUrl: string
+    public postLogoutRedirectUrl: string
+    public postErrorRedirectUrl: string
+
     constructor(
         port: string,
         endpointsPrefix: string,
@@ -64,7 +69,10 @@ export default class OAuthAgentConfiguration {
         encKey: string,
         trustedWebOrigins: string[],
         corsEnabled: boolean,
-        cookieOptions?: CookieSerializeOptions) {
+        postLoginRedirectUrl: string,
+        postLogoutRedirectUrl: string,
+        postErrorRedirectUrl: string,
+        cookieOptions?: CookieSerializeOptions,) {
 
         this.port = port
         this.endpointsPrefix = endpointsPrefix
@@ -92,5 +100,9 @@ export default class OAuthAgentConfiguration {
         this.logoutEndpoint = logoutEndpoint
         this.tokenEndpoint = tokenEndpoint
         this.userInfoEndpoint = userInfoEndpoint
+
+        this.postLoginRedirectUrl = postLoginRedirectUrl
+        this.postLogoutRedirectUrl = postLogoutRedirectUrl
+        this.postErrorRedirectUrl = postErrorRedirectUrl
     }
 }
