@@ -15,7 +15,7 @@
  */
 
 import * as express from 'express'
-import {getATCookieName, getUserInfo, ValidateRequestOptions} from '../lib'
+import {getATCookieName, getUserInfoUsingEncryptedAccessToken, getUserInfoUsingPlainAccessToken, ValidateRequestOptions} from '../lib'
 import {config} from '../config'
 import validateExpressRequest from '../validateExpressRequest'
 import {InvalidCookieException} from '../lib/exceptions'
@@ -26,6 +26,29 @@ class UserInfoController {
 
     constructor() {
         this.router.get('/', asyncCatch(this.getUserInfo))
+        this.router.get('/unencrypted', asyncCatch(this.getUserInfoUsingPlainAccessToken))
+    }
+
+    getUserInfoUsingPlainAccessToken = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+        // Verify the web origin
+        // const options = new ValidateRequestOptions()
+        // options.requireCsrfHeader = false;
+        // options.requireTrustedOrigin = config.corsEnabled;
+        // validateExpressRequest(req, options)
+
+        const atCookieName = getATCookieName(config.cookieNamePrefix)
+        if (req.cookies && req.cookies[atCookieName]) {
+
+            const accessToken = req.cookies[atCookieName]
+            const userData = await getUserInfoUsingPlainAccessToken(config, accessToken)
+            res.status(200).json(userData)
+
+        } else {
+            const error = new InvalidCookieException()
+            error.logInfo = 'No AT cookie was supplied in a call to get user info'
+            throw error
+        }
     }
 
     getUserInfo = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -40,7 +63,7 @@ class UserInfoController {
         if (req.cookies && req.cookies[atCookieName]) {
 
             const accessToken = req.cookies[atCookieName]
-            const userData = await getUserInfo(config, config.encKey, accessToken)
+            const userData = await getUserInfoUsingEncryptedAccessToken(config, config.encKey, accessToken)
             res.status(200).json(userData)
 
         } else {

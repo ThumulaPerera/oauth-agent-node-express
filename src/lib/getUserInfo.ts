@@ -20,18 +20,28 @@ import {Grant} from './grant'
 import OAuthAgentConfiguration from './oauthAgentConfiguration'
 import {OAuthAgentException, InvalidCookieException, AuthorizationClientException, AuthorizationServerException} from './exceptions'
 
-async function getUserInfo(config: OAuthAgentConfiguration, encKey: string, encryptedCookie: string): Promise<Object> {
+async function getUserInfoUsingPlainAccessToken(config: OAuthAgentConfiguration, cookie: string): Promise<Object> {
+    
+    return await getUserInfo(config, cookie)
+}
+
+async function getUserInfoUsingEncryptedAccessToken(config: OAuthAgentConfiguration, encKey: string, encryptedCookie: string): Promise<Object> {
+
+    let accessToken = null
+    try {
+        accessToken = decryptCookie(encKey, encryptedCookie)
+    } catch (err: any) {
+        const error = new InvalidCookieException(err)
+        error.logInfo = 'Unable to decrypt the access token cookie to get user info'
+        throw error
+    }
+
+    return await getUserInfo(config, accessToken)
+}
+
+async function getUserInfo(config: OAuthAgentConfiguration, accessToken: string): Promise<Object> {
 
     try {
-        let accessToken = null
-        try {
-            accessToken = decryptCookie(encKey, encryptedCookie)
-        } catch (err: any) {
-            const error = new InvalidCookieException(err)
-            error.logInfo = 'Unable to decrypt the access token cookie to get user info'
-            throw error
-        }
-
         const res = await fetch(
             config.userInfoEndpoint,
             {
@@ -69,4 +79,4 @@ async function getUserInfo(config: OAuthAgentConfiguration, encKey: string, encr
     }
 }
 
-export default getUserInfo
+export { getUserInfoUsingEncryptedAccessToken, getUserInfoUsingPlainAccessToken }
