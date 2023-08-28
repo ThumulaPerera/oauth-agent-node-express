@@ -15,8 +15,8 @@
  */
 
 import * as express from 'express'
-import {getIDCookieName, getIDTokenClaims, ValidateRequestOptions} from '../lib'
-import {config} from '../config'
+import {getIDCookieName, getIDTokenClaims, ValidateRequestOptions, configManager} from '../lib'
+import {serverConfig} from '../serverConfig'
 import validateExpressRequest from '../validateExpressRequest'
 import {InvalidCookieException} from '../lib/exceptions'
 import {asyncCatch} from '../middleware/exceptionMiddleware';
@@ -30,13 +30,15 @@ class ClaimsController {
 
     getClaims = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
+        const config = configManager.config
+
         // Verify the web origin
         const options = new ValidateRequestOptions()
         options.requireCsrfHeader = false;
-        options.requireTrustedOrigin = config.corsEnabled;
-        validateExpressRequest(req, options)
+        options.requireTrustedOrigin = serverConfig.corsEnabled;
+        validateExpressRequest(req, options, config, serverConfig)
 
-        const idTokenCookieName = getIDCookieName(config.cookieNamePrefix)
+        const idTokenCookieName = getIDCookieName(serverConfig.cookieNamePrefix)
         if (req.cookies && req.cookies[idTokenCookieName]) {
 
             const userData = getIDTokenClaims(config.encKey, req.cookies[idTokenCookieName])

@@ -15,6 +15,7 @@
  */
 
 import * as express from 'express'
+import {serverConfig} from '../serverConfig'
 import {
     ValidateRequestOptions,
     createAuthorizationRequest,
@@ -53,11 +54,11 @@ class LoginController {
 
         const authorizationRequestData = createAuthorizationRequest(config, req.body)
 
-        const tempLoginDataCookieOptions = config.cookieOptions
+        const tempLoginDataCookieOptions = serverConfig.cookieOptions
         tempLoginDataCookieOptions.sameSite = 'lax'
 
         res.setHeader('Set-Cookie',
-            getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, tempLoginDataCookieOptions, config.cookieNamePrefix, config.encKey))
+            getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, tempLoginDataCookieOptions, serverConfig.cookieNamePrefix, config.encKey))
         res.setHeader('Location', authorizationRequestData.authorizationRequestURL)
         res.status(302).send()
     }
@@ -75,7 +76,7 @@ class LoginController {
 
         if (data.code && data.state) {
 
-            const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(config.cookieNamePrefix)] : undefined
+            const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(serverConfig.cookieNamePrefix)] : undefined
 
             const tokenResponse = await getTokenEndpointResponse(config, data.code, data.state, tempLoginData)
             if (tokenResponse.id_token) {
@@ -83,7 +84,7 @@ class LoginController {
             }
 
             csrfToken = generateRandomString()
-            const csrfCookie = req.cookies[getCSRFCookieName(config.cookieNamePrefix)]
+            const csrfCookie = req.cookies[getCSRFCookieName(serverConfig.cookieNamePrefix)]
             if (csrfCookie) {
 
                 try {
@@ -102,7 +103,7 @@ class LoginController {
                 csrfToken = generateRandomString()
             }
 
-            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, true, csrfToken, false)
+            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, serverConfig, true, csrfToken, false)
             res.set('Set-Cookie', cookiesToSet)
             res.setHeader('Location', config.postLoginRedirectUrl)
         } else {
@@ -129,7 +130,7 @@ class LoginController {
     //     const authorizationRequestData = createAuthorizationRequest(config, req.body)
 
     //     res.setHeader('Set-Cookie',
-    //         getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, config.cookieOptions, config.cookieNamePrefix, config.encKey))
+    //         getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, serverConfig.cookieOptions, serverConfig.cookieNamePrefix, config.encKey))
     //     res.status(200).json({
     //         authorizationRequestUrl: authorizationRequestData.authorizationRequestURL
     //     })
@@ -153,7 +154,7 @@ class LoginController {
 
     //     if (data.code && data.state) {
 
-    //         const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(config.cookieNamePrefix)] : undefined
+    //         const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(serverConfig.cookieNamePrefix)] : undefined
 
     //         const tokenResponse = await getTokenEndpointResponse(config, data.code, data.state, tempLoginData)
     //         if (tokenResponse.id_token) {
@@ -161,7 +162,7 @@ class LoginController {
     //         }
 
     //         csrfToken = generateRandomString()
-    //         const csrfCookie = req.cookies[getCSRFCookieName(config.cookieNamePrefix)]
+    //         const csrfCookie = req.cookies[getCSRFCookieName(serverConfig.cookieNamePrefix)]
     //         if (csrfCookie) {
 
     //             try {
@@ -188,10 +189,10 @@ class LoginController {
     //     } else {
 
     //         // During a page reload, return the existing anti forgery token
-    //         isLoggedIn = !!(req.cookies && req.cookies[getATCookieName(config.cookieNamePrefix)])
+    //         isLoggedIn = !!(req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)])
     //         if (isLoggedIn) {
 
-    //             csrfToken = decryptCookie(config.encKey, req.cookies[getCSRFCookieName(config.cookieNamePrefix)])
+    //             csrfToken = decryptCookie(config.encKey, req.cookies[getCSRFCookieName(serverConfig.cookieNamePrefix)])
     //         }
     //     }
 

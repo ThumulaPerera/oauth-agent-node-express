@@ -19,6 +19,7 @@ import {getATCookieName, getUserInfoUsingEncryptedAccessToken, getUserInfoUsingP
 import validateExpressRequest from '../validateExpressRequest'
 import {InvalidCookieException} from '../lib/exceptions'
 import {asyncCatch} from '../middleware/exceptionMiddleware';
+import {serverConfig} from '../serverConfig'
 
 class UserInfoController {
     public router = express.Router()
@@ -38,7 +39,7 @@ class UserInfoController {
 
         const config = configManager.config
 
-        const atCookieName = getATCookieName(config.cookieNamePrefix)
+        const atCookieName = getATCookieName(serverConfig.cookieNamePrefix)
         if (req.cookies && req.cookies[atCookieName]) {
 
             const accessToken = req.cookies[atCookieName]
@@ -60,7 +61,7 @@ class UserInfoController {
     //     options.requireTrustedOrigin = config.corsEnabled;
     //     validateExpressRequest(req, options)
 
-    //     const atCookieName = getATCookieName(config.cookieNamePrefix)
+    //     const atCookieName = getATCookieName(serverConfig.cookieNamePrefix)
     //     if (req.cookies && req.cookies[atCookieName]) {
 
     //         const accessToken = req.cookies[atCookieName]

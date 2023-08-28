@@ -26,18 +26,18 @@ import {
     LogoutController,
     RefreshTokenController
 } from './controller'
-import {config} from './config'
+import {serverConfig} from './serverConfig'
 import loggingMiddleware from './middleware/loggingMiddleware'
 import exceptionMiddleware from './middleware/exceptionMiddleware'
 
 const app = express()
 const corsConfiguration = {
-    origin: config.trustedWebOrigins,
+    origin: serverConfig.trustedWebOrigins,
     credentials: true,
     methods: ['POST']
 }
 
-if (config.corsEnabled) {
+if (serverConfig.corsEnabled) {
     app.use(cors(corsConfiguration))
 }
 
@@ -56,25 +56,25 @@ const controllers = {
 }
 
 for (const [path, controller] of Object.entries(controllers)) {
-    app.use(config.endpointsPrefix + path, controller.router)
+    app.use(serverConfig.endpointsPrefix + path, controller.router)
 }
 
-if (config.serverCertPath) {
+if (serverConfig.serverCertPath) {
 
-    const pfx = fs.readFileSync(config.serverCertPath);
+    const pfx = fs.readFileSync(serverConfig.serverCertPath);
     const sslOptions = {
         pfx,
-        passphrase: config.serverCertPassword,
+        passphrase: serverConfig.serverCertPassword,
     };
 
     const httpsServer = https.createServer(sslOptions, app);
-    httpsServer.listen(config.port, () => {
-        console.log(`OAuth Agent is listening on HTTPS port ${config.port}`);
+    httpsServer.listen(serverConfig.port, () => {
+        console.log(`OAuth Agent is listening on HTTPS port ${serverConfig.port}`);
     });
 
 } else {
 
-    app.listen(config.port, function() {
-        console.log(`OAuth Agent is listening on HTTP port ${config.port}`)
+    app.listen(serverConfig.port, function() {
+        console.log(`OAuth Agent is listening on HTTP port ${serverConfig.port}`)
     })
 }

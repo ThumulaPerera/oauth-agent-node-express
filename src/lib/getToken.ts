@@ -17,10 +17,10 @@
 import fetch from 'node-fetch'
 import {decryptCookie} from './cookieEncrypter'
 import {Grant} from './grant'
-import OAuthAgentConfiguration from './oauthAgentConfiguration'
+import AppConfiguration from './appConfiguration'
 import {OAuthAgentException, InvalidStateException, MissingTempLoginDataException, AuthorizationClientException, AuthorizationServerException} from './exceptions'
 
-async function getTokenEndpointResponse(config: OAuthAgentConfiguration, code: string, state: string, tempLoginData: string | undefined | null, ): Promise<any> {
+async function getTokenEndpointResponse(config: AppConfiguration, code: string, state: string, tempLoginData: string | undefined | null, ): Promise<any> {
     if (!tempLoginData) {
         return Promise.reject(new MissingTempLoginDataException())
     }
@@ -69,7 +69,7 @@ async function getTokenEndpointResponse(config: OAuthAgentConfiguration, code: s
     }
 }
 
-async function refreshAccessToken(refreshToken: string, config: OAuthAgentConfiguration): Promise<any>
+async function refreshAccessToken(refreshToken: string, config: AppConfiguration): Promise<any>
 {
     try {
 

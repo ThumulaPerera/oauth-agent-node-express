@@ -15,6 +15,7 @@
  */
 
 import * as express from 'express'
+import {serverConfig} from '../serverConfig'
 import {getATCookieName, getCookiesForUnset, getLogoutURL, ValidateRequestOptions, decryptCookie, getIDCookieName, getIDTokenClaims, configManager} from '../lib'
 import {InvalidCookieException} from '../lib/exceptions'
 import validateExpressRequest from '../validateExpressRequest'
@@ -37,13 +38,13 @@ class LogoutController {
         // const options = new ValidateRequestOptions()
         // validateExpressRequest(req, options)
 
-        if (req.cookies && req.cookies[getATCookieName(config.cookieNamePrefix)] && req.cookies[getIDCookieName(config.cookieNamePrefix)]) {
+        if (req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)] && req.cookies[getIDCookieName(serverConfig.cookieNamePrefix)]) {
 
-            const idTokenCookieName = getIDCookieName(config.cookieNamePrefix)
+            const idTokenCookieName = getIDCookieName(serverConfig.cookieNamePrefix)
             const idToken = decryptCookie(config.encKey, req.cookies[idTokenCookieName])
 
             const logoutURL = getLogoutURL(config, idToken)
-            res.setHeader('Set-Cookie', getCookiesForUnset(config.cookieOptions, config.cookieNamePrefix))
+            res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
             res.setHeader('Location', logoutURL)
             res.status(302).send()
 
@@ -68,10 +69,10 @@ class LogoutController {
     //     const options = new ValidateRequestOptions()
     //     validateExpressRequest(req, options)
 
-    //     if (req.cookies && req.cookies[getATCookieName(config.cookieNamePrefix)]) {
+    //     if (req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)]) {
 
     //         const logoutURL = getLogoutURL(config)
-    //         res.setHeader('Set-Cookie', getCookiesForUnset(config.cookieOptions, config.cookieNamePrefix))
+    //         res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
     //         res.json({ url: logoutURL})
 
     //     } else {

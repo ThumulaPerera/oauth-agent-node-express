@@ -14,7 +14,8 @@
  *  limitations under the License.
  */
 
-import OAuthAgentConfiguration from './oauthAgentConfiguration'
+import AppConfiguration from './appConfiguration'
+import ServerConfiguration from './ServerConfiguration'
 import { createAuthorizationRequest, handleAuthorizationResponse } from './loginHandler'
 import { validateIDtoken } from './idTokenValidator'
 import { ClientOptions } from './clientOptions'
@@ -31,7 +32,8 @@ import { getAuthCookieName, getIDCookieName, getCSRFCookieName, getATCookieName,
 import configManager from './configManager'
 
 export {
-    OAuthAgentConfiguration,
+    AppConfiguration,
+    ServerConfiguration,
     ClientOptions,
     ValidateRequestOptions,
     configManager,

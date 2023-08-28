@@ -14,9 +14,9 @@
  *  limitations under the License.
  */
 
-import OAuthAgentConfiguration from './oauthAgentConfiguration'
+import AppConfiguration from "./appConfiguration"
 
-function getLogoutURL(config: OAuthAgentConfiguration, idToken: string = ""): string {
+function getLogoutURL(config: AppConfiguration, idToken: string = ""): string {
 
     let urlObj = new URL(config.logoutEndpoint)
     if (config.oidcPostLogoutRedirectURI) {

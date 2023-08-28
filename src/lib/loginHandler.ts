@@ -16,12 +16,12 @@
 
 import * as urlparse from 'url-parse'
 import {ClientOptions} from './clientOptions';
-import OAuthAgentConfiguration from './oauthAgentConfiguration';
+import AppConfiguration from './appConfiguration';
 import {generateHash, generateRandomString} from './pkce';
 import {AuthorizationRequestData} from './authorizationRequestData';
 import {AuthorizationResponseException} from './exceptions'
 
-export function createAuthorizationRequest(config: OAuthAgentConfiguration, options?: ClientOptions): AuthorizationRequestData {
+export function createAuthorizationRequest(config: AppConfiguration, options?: ClientOptions): AuthorizationRequestData {
 
     const codeVerifier = generateRandomString()
     const state = generateRandomString()

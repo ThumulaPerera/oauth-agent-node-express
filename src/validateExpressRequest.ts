@@ -15,17 +15,17 @@
  */
 
 import validateRequest, {ValidateRequestData, ValidateRequestOptions} from './lib/validateRequest'
-import {config} from './config'
+import {AppConfiguration, ServerConfiguration} from './lib'
 import {getCSRFCookieName} from './lib'
 import * as express from 'express'
 
-export default function validateExpressRequest(req: express.Request, options: ValidateRequestOptions) {
+export default function validateExpressRequest(req: express.Request, options: ValidateRequestOptions, config: AppConfiguration, serverConfig: ServerConfiguration) {
 
     const data = new ValidateRequestData(
-        req.header('x-' + config.cookieNamePrefix + '-csrf'),
-        req.cookies && req.cookies[getCSRFCookieName(config.cookieNamePrefix)],
+        req.header('x-' + serverConfig.cookieNamePrefix + '-csrf'),
+        req.cookies && req.cookies[getCSRFCookieName(serverConfig.cookieNamePrefix)],
         req.header('Origin'),
-        config.trustedWebOrigins,
+        serverConfig.trustedWebOrigins,
         config.encKey,
     )
 

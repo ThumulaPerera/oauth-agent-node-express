@@ -1,8 +1,8 @@
-import { config } from '../config'; 
-import OAuthAgentConfiguration from './oauthAgentConfiguration';
+import { config } from '../appConfig'; 
+import AppConfiguration from './appConfiguration';
 
 class ConfigManager {
-    get config(): OAuthAgentConfiguration {
+    get config(): AppConfiguration {
       return config
     }
 }

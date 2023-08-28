@@ -16,14 +16,14 @@
 
 import * as jose from 'jose';
 import {InvalidIDTokenException} from './exceptions';
-import OAuthAgentConfiguration from './oauthAgentConfiguration';
+import AppConfiguration from './appConfiguration';
 
 /*
  * Make some sanity checks to ensure that the issuer and audience are configured correctly
  * The ID token is received over a trusted back channel connection so its signature does not need verifying
  * https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
  */
-export function validateIDtoken(config: OAuthAgentConfiguration, idToken: string) {
+export function validateIDtoken(config: AppConfiguration, idToken: string) {
 
     // For backwards compatibility, only validate the issuer when one is configured
     if (process.env.ISSUER) {

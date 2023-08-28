@@ -17,15 +17,15 @@
 import fetch from 'node-fetch'
 import {decryptCookie} from './cookieEncrypter'
 import {Grant} from './grant'
-import OAuthAgentConfiguration from './oauthAgentConfiguration'
+import AppConfiguration from './appConfiguration'
 import {OAuthAgentException, InvalidCookieException, AuthorizationClientException, AuthorizationServerException} from './exceptions'
 
-async function getUserInfoUsingPlainAccessToken(config: OAuthAgentConfiguration, cookie: string): Promise<Object> {
+async function getUserInfoUsingPlainAccessToken(config: AppConfiguration, cookie: string): Promise<Object> {
     
     return await getUserInfo(config, cookie)
 }
 
-async function getUserInfoUsingEncryptedAccessToken(config: OAuthAgentConfiguration, encKey: string, encryptedCookie: string): Promise<Object> {
+async function getUserInfoUsingEncryptedAccessToken(config: AppConfiguration, encKey: string, encryptedCookie: string): Promise<Object> {
 
     let accessToken = null
     try {
@@ -39,7 +39,7 @@ async function getUserInfoUsingEncryptedAccessToken(config: OAuthAgentConfigurat
     return await getUserInfo(config, accessToken)
 }
 
-async function getUserInfo(config: OAuthAgentConfiguration, accessToken: string): Promise<Object> {
+async function getUserInfo(config: AppConfiguration, accessToken: string): Promise<Object> {
 
     try {
         const res = await fetch(

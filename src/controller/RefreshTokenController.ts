@@ -15,10 +15,10 @@
  */
 
 import * as express from 'express'
-import {config} from '../config'
-
+// import {config} from '../config'
+import {serverConfig} from '../serverConfig'
 import {
-    decryptCookie, getAuthCookieName, getCookiesForTokenResponse, refreshAccessToken, validateIDtoken, ValidateRequestOptions
+    decryptCookie, getAuthCookieName, getCookiesForTokenResponse, refreshAccessToken, validateIDtoken, ValidateRequestOptions, configManager
 } from '../lib'
 import {InvalidCookieException} from '../lib/exceptions'
 import validateExpressRequest from '../validateExpressRequest'
@@ -33,11 +33,13 @@ class RefreshTokenController {
 
     RefreshTokenFromCookie = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
+        const config = configManager.config
+
         // Check for an allowed origin and the presence of a CSRF token
         const options = new ValidateRequestOptions()
-        validateExpressRequest(req, options)
+        validateExpressRequest(req, options, config, serverConfig)
 
-        const authCookieName = getAuthCookieName(config.cookieNamePrefix)
+        const authCookieName = getAuthCookieName(serverConfig.cookieNamePrefix)
         if (req.cookies && req.cookies[authCookieName]) {
             
             const refreshToken = decryptCookie(config.encKey, req.cookies[authCookieName])
@@ -47,7 +49,7 @@ class RefreshTokenController {
                 validateIDtoken(config, tokenResponse.id_token)
             }
 
-            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config)
+            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, serverConfig)
             res.setHeader('Set-Cookie', cookiesToSet)
             res.status(204).send()
 
