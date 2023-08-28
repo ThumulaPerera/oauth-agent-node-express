@@ -28,8 +28,8 @@ import {
     getCookiesForTokenResponse,
     getATCookieName,
     generateRandomString,
+    configManager,
 } from '../lib'
-import { config } from '../config'
 import validateExpressRequest from '../validateExpressRequest'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
 
@@ -39,19 +39,17 @@ class LoginController {
     constructor() {
         this.router.get('/start', asyncCatch(this.getStartLogin))
         this.router.get('/callback', asyncCatch(this.handleCallback))
-        this.router.post('/start', asyncCatch(this.postStartLogin))
-        this.router.post('/end', asyncCatch(this.handlePageLoad))
+        // this.router.post('/start', asyncCatch(this.postStartLogin))
+        // this.router.post('/end', asyncCatch(this.handlePageLoad))
     }
 
     /*
- * The SPA calls this endpoint to ask the OAuth Agent for the authorization request URL
- */
+    * The SPA calls this endpoint to initiate the login flow
+    */
     getStartLogin = async (req: express.Request, res: express.Response) => {
 
-        // TODO: see if we need these validations in the redirection based flow
-        // const options = new ValidateRequestOptions()
-        // options.requireCsrfHeader = false
-        // validateExpressRequest(req, options)
+        // call the getter for config
+        const config = configManager.config
 
         const authorizationRequestData = createAuthorizationRequest(config, req.body)
 
@@ -66,14 +64,12 @@ class LoginController {
 
     handleCallback = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-        // TODO: see if we need these validations in the redirection based flow
-        // const options = new ValidateRequestOptions()
-        // options.requireCsrfHeader = false
-        // validateExpressRequest(req, options)
+        // call the getter for config
+        const config = configManager.config
 
-        const currentUrl = req.protocol + '://' + req.get('host') + req.originalUrl
+        const requestUrl = req.protocol + '://' + req.get('host') + req.originalUrl
 
-        const data = await handleAuthorizationResponse(currentUrl)
+        const data = await handleAuthorizationResponse(requestUrl)
 
         let csrfToken: string = ''
 
@@ -121,95 +117,95 @@ class LoginController {
         res.status(302).send()
     }
 
-    /*
-     * The SPA calls this endpoint to ask the OAuth Agent for the authorization request URL
-     */
-    postStartLogin = async (req: express.Request, res: express.Response) => {
+    // /*
+    //  * The SPA calls this endpoint to ask the OAuth Agent for the authorization request URL
+    //  */
+    // postStartLogin = async (req: express.Request, res: express.Response) => {
 
-        const options = new ValidateRequestOptions()
-        options.requireCsrfHeader = false
-        validateExpressRequest(req, options)
+    //     const options = new ValidateRequestOptions()
+    //     options.requireCsrfHeader = false
+    //     validateExpressRequest(req, options)
 
-        const authorizationRequestData = createAuthorizationRequest(config, req.body)
+    //     const authorizationRequestData = createAuthorizationRequest(config, req.body)
 
-        res.setHeader('Set-Cookie',
-            getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, config.cookieOptions, config.cookieNamePrefix, config.encKey))
-        res.status(200).json({
-            authorizationRequestUrl: authorizationRequestData.authorizationRequestURL
-        })
-    }
+    //     res.setHeader('Set-Cookie',
+    //         getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, config.cookieOptions, config.cookieNamePrefix, config.encKey))
+    //     res.status(200).json({
+    //         authorizationRequestUrl: authorizationRequestData.authorizationRequestURL
+    //     })
+    // }
 
-    /*
-     * The SPA posts its URL here on every page load, to get its authenticated state
-     * When an OAuth response is received it is handled and cookies are written
-     */
-    handlePageLoad = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // /*
+    //  * The SPA posts its URL here on every page load, to get its authenticated state
+    //  * When an OAuth response is received it is handled and cookies are written
+    //  */
+    // handlePageLoad = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-        const options = new ValidateRequestOptions()
-        options.requireCsrfHeader = false
-        validateExpressRequest(req, options)
+    //     const options = new ValidateRequestOptions()
+    //     options.requireCsrfHeader = false
+    //     validateExpressRequest(req, options)
 
-        const data = await handleAuthorizationResponse(req.body?.pageUrl)
+    //     const data = await handleAuthorizationResponse(req.body?.pageUrl)
 
-        let isLoggedIn = false
-        let handled = false
-        let csrfToken: string = ''
+    //     let isLoggedIn = false
+    //     let handled = false
+    //     let csrfToken: string = ''
 
-        if (data.code && data.state) {
+    //     if (data.code && data.state) {
 
-            const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(config.cookieNamePrefix)] : undefined
+    //         const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(config.cookieNamePrefix)] : undefined
 
-            const tokenResponse = await getTokenEndpointResponse(config, data.code, data.state, tempLoginData)
-            if (tokenResponse.id_token) {
-                validateIDtoken(config, tokenResponse.id_token)
-            }
+    //         const tokenResponse = await getTokenEndpointResponse(config, data.code, data.state, tempLoginData)
+    //         if (tokenResponse.id_token) {
+    //             validateIDtoken(config, tokenResponse.id_token)
+    //         }
 
-            csrfToken = generateRandomString()
-            const csrfCookie = req.cookies[getCSRFCookieName(config.cookieNamePrefix)]
-            if (csrfCookie) {
+    //         csrfToken = generateRandomString()
+    //         const csrfCookie = req.cookies[getCSRFCookieName(config.cookieNamePrefix)]
+    //         if (csrfCookie) {
 
-                try {
-                    // Avoid setting a new value if the user opens two browser tabs and signs in on both
-                    csrfToken = decryptCookie(config.encKey, csrfCookie)
+    //             try {
+    //                 // Avoid setting a new value if the user opens two browser tabs and signs in on both
+    //                 csrfToken = decryptCookie(config.encKey, csrfCookie)
 
-                } catch (e) {
+    //             } catch (e) {
 
-                    // If the system has been redeployed with a new cookie encryption key, decrypting old cookies from the browser will fail
-                    // In this case generate a new CSRF token so that the SPA can complete its login without errors
-                    csrfToken = generateRandomString()
-                }
-            } else {
+    //                 // If the system has been redeployed with a new cookie encryption key, decrypting old cookies from the browser will fail
+    //                 // In this case generate a new CSRF token so that the SPA can complete its login without errors
+    //                 csrfToken = generateRandomString()
+    //             }
+    //         } else {
 
-                // Generate a new value otherwise
-                csrfToken = generateRandomString()
-            }
+    //             // Generate a new value otherwise
+    //             csrfToken = generateRandomString()
+    //         }
 
-            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, true, csrfToken)
-            res.set('Set-Cookie', cookiesToSet)
-            handled = true
-            isLoggedIn = true
+    //         const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, true, csrfToken)
+    //         res.set('Set-Cookie', cookiesToSet)
+    //         handled = true
+    //         isLoggedIn = true
 
-        } else {
+    //     } else {
 
-            // During a page reload, return the existing anti forgery token
-            isLoggedIn = !!(req.cookies && req.cookies[getATCookieName(config.cookieNamePrefix)])
-            if (isLoggedIn) {
+    //         // During a page reload, return the existing anti forgery token
+    //         isLoggedIn = !!(req.cookies && req.cookies[getATCookieName(config.cookieNamePrefix)])
+    //         if (isLoggedIn) {
 
-                csrfToken = decryptCookie(config.encKey, req.cookies[getCSRFCookieName(config.cookieNamePrefix)])
-            }
-        }
+    //             csrfToken = decryptCookie(config.encKey, req.cookies[getCSRFCookieName(config.cookieNamePrefix)])
+    //         }
+    //     }
 
-        const responseBody = {
-            handled,
-            isLoggedIn,
-        } as any
+    //     const responseBody = {
+    //         handled,
+    //         isLoggedIn,
+    //     } as any
 
-        if (csrfToken) {
-            responseBody.csrf = csrfToken
-        }
+    //     if (csrfToken) {
+    //         responseBody.csrf = csrfToken
+    //     }
 
-        res.status(200).json(responseBody)
-    }
+    //     res.status(200).json(responseBody)
+    // }
 }
 
 export default LoginController

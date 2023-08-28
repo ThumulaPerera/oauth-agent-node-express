@@ -28,11 +28,13 @@ import getRedirectUri from './redirectUri'
 import getLogoutURL from './getLogoutURL'
 import { getTempLoginDataCookie, getTempLoginDataCookieForUnset, generateRandomString } from './pkce'
 import { getAuthCookieName, getIDCookieName, getCSRFCookieName, getATCookieName, getTempLoginDataCookieName } from './cookieName'
+import configManager from './configManager'
 
 export {
     OAuthAgentConfiguration,
     ClientOptions,
     ValidateRequestOptions,
+    configManager,
     createAuthorizationRequest,
     handleAuthorizationResponse,
     validateIDtoken,
