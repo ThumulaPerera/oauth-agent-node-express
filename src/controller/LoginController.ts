@@ -49,8 +49,7 @@ class LoginController {
     */
     getStartLogin = async (req: express.Request, res: express.Response) => {
 
-        // call the getter for config
-        const config = configManager.config
+        const config = await configManager.getConfigForRequest(req)
 
         const authorizationRequestData = createAuthorizationRequest(config, req.body)
 
@@ -65,8 +64,7 @@ class LoginController {
 
     handleCallback = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-        // call the getter for config
-        const config = configManager.config
+        const config = await configManager.getConfigForRequest(req)
 
         const requestUrl = req.protocol + '://' + req.get('host') + req.originalUrl
 

@@ -32,8 +32,8 @@ class LogoutController {
 
     startLogoutUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-        const config = configManager.config
-
+        const config = await configManager.getConfigForRequest(req)
+        
         // Check for an allowed origin and the presence of a CSRF token
         // const options = new ValidateRequestOptions()
         // validateExpressRequest(req, options)
@@ -57,7 +57,7 @@ class LogoutController {
 
     handlePostLogout = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-        const config = configManager.config
+        const config = await configManager.getConfigForRequest(req)
 
         res.setHeader('Location', config.postLogoutRedirectUrl)
         res.status(302).send()

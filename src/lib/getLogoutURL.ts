@@ -19,8 +19,8 @@ import AppConfiguration from "./appConfiguration"
 function getLogoutURL(config: AppConfiguration, idToken: string = ""): string {
 
     let urlObj = new URL(config.logoutEndpoint)
-    if (config.oidcPostLogoutRedirectURI) {
-        urlObj.searchParams.set("post_logout_redirect_uri", config.oidcPostLogoutRedirectURI)
+    if (config.oidcPostLogoutRedirectUri) {
+        urlObj.searchParams.set("post_logout_redirect_uri", config.oidcPostLogoutRedirectUri)
     }
     if (idToken) {
         urlObj.searchParams.set("id_token_hint", idToken)

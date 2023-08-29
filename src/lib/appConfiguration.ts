@@ -15,12 +15,12 @@
  */
 
 export default class AppConfiguration {
-    
+
     // OIDC Client Configuration
     public clientID: string
     public clientSecret: string
     public redirectUri: string
-    public oidcPostLogoutRedirectURI: string
+    public oidcPostLogoutRedirectUri: string
     public scope: string
 
     // Authorization Server settings
@@ -42,7 +42,7 @@ export default class AppConfiguration {
         clientID: string,
         clientSecret: string,
         redirectUri: string,
-        oidcPostLogoutRedirectURI: string,
+        oidcPostLogoutRedirectUri: string,
         scope: string,
         issuer: string,
         authorizeEndpoint: string,
@@ -57,7 +57,7 @@ export default class AppConfiguration {
         this.clientID = clientID
         this.clientSecret = clientSecret
         this.redirectUri = redirectUri
-        this.oidcPostLogoutRedirectURI = oidcPostLogoutRedirectURI
+        this.oidcPostLogoutRedirectUri = oidcPostLogoutRedirectUri
         this.scope = scope
 
         this.encKey = encKey
@@ -71,5 +71,57 @@ export default class AppConfiguration {
         this.postLoginRedirectUrl = postLoginRedirectUrl
         this.postLogoutRedirectUrl = postLogoutRedirectUrl
         this.postErrorRedirectUrl = postErrorRedirectUrl
+    }
+
+    private static requiredParams = [
+        'clientID',
+        'clientSecret',
+        'redirectUri',
+        'oidcPostLogoutRedirectUri',
+        'scope',
+        'issuer',
+        'authorizeEndpoint',
+        'logoutEndpoint',
+        'tokenEndpoint',
+        'userInfoEndpoint',
+        'encKey',
+        'postLoginRedirectUrl',
+        'postLogoutRedirectUrl',
+        'postErrorRedirectUrl'
+    ]
+
+    static create(params: { [key: string]: string }): AppConfiguration | null {
+        if (!this.isValidParams(params)) {
+            return null;
+        }
+
+        // Create an instance using the provided parameters
+        const instance = new AppConfiguration(
+            params.clientID,
+            params.clientSecret,
+            params.redirectUri,
+            params.oidcPostLogoutRedirectUri,
+            params.scope,
+            params.issuer,
+            params.authorizeEndpoint,
+            params.logoutEndpoint,
+            params.tokenEndpoint,
+            params.userInfoEndpoint,
+            params.encKey,
+            params.postLoginRedirectUrl,
+            params.postLogoutRedirectUrl,
+            params.postErrorRedirectUrl
+        );
+        return instance;
+    }
+
+    private static isValidParams(params: { [key: string]: string }): boolean {
+        for (const param of this.requiredParams) {
+            if (!params[param]) {
+                console.error(`Missing required parameter: ${param}`);
+                return false;
+            }
+        }
+        return true;
     }
 }

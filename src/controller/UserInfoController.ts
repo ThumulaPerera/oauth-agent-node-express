@@ -37,7 +37,7 @@ class UserInfoController {
         // options.requireTrustedOrigin = config.corsEnabled;
         // validateExpressRequest(req, options)
 
-        const config = configManager.config
+        const config = await configManager.getConfigForRequest(req)
 
         const atCookieName = getATCookieName(serverConfig.cookieNamePrefix)
         if (req.cookies && req.cookies[atCookieName]) {

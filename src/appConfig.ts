@@ -24,7 +24,7 @@ export const config: AppConfiguration = {
     clientID: process.env.CLIENT_ID || 'spa-client',
     clientSecret: process.env.CLIENT_SECRET || 'Password1',
     redirectUri: process.env.REDIRECT_URI || 'http://www.example.local/',
-    oidcPostLogoutRedirectURI: process.env.ODIC_POST_LOGOUT_REDIRECT_URI || 'http://www.example.local/',
+    oidcPostLogoutRedirectUri: process.env.ODIC_POST_LOGOUT_REDIRECT_URI || 'http://www.example.local/',
     scope: process.env.SCOPE || 'openid profile',
 
     // Cookie related settings

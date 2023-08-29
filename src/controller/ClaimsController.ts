@@ -30,7 +30,7 @@ class ClaimsController {
 
     getClaims = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-        const config = configManager.config
+        const config = await configManager.getConfigForRequest(req)
 
         // Verify the web origin
         const options = new ValidateRequestOptions()
