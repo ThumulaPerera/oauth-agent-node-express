@@ -15,7 +15,7 @@
  */
 
 import AppConfiguration from './appConfiguration'
-import ServerConfiguration from './ServerConfiguration'
+import ServerConfiguration from './serverConfiguration'
 import { createAuthorizationRequest, handleAuthorizationResponse } from './loginHandler'
 import { validateIDtoken } from './idTokenValidator'
 import { ClientOptions } from './clientOptions'

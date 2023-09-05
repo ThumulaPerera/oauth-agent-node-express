@@ -17,7 +17,7 @@
 import {CookieSerializeOptions, serialize} from 'cookie'
 import {getEncryptedCookie} from './cookieEncrypter'
 import AppConfiguration from './appConfiguration'
-import ServerConfiguration from './ServerConfiguration'
+import ServerConfiguration from './serverConfiguration'
 import {getATCookieName, getAuthCookieName, getCSRFCookieName, getIDCookieName} from './cookieName'
 import {getTempLoginDataCookieForUnset} from './pkce'
 
