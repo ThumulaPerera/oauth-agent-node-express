@@ -15,6 +15,7 @@
  */
 
 import fetch from 'node-fetch'
+import jwt_decode, { JwtPayload } from 'jwt-decode'
 import {decryptCookie} from './cookieEncrypter'
 import {Grant} from './grant'
 import AppConfiguration from './appConfiguration'
@@ -79,4 +80,12 @@ async function getUserInfo(config: AppConfiguration, accessToken: string): Promi
     }
 }
 
-export { getUserInfoUsingEncryptedAccessToken, getUserInfoUsingPlainAccessToken }
+async function getUserInfoUsingIdToken(encKey: string, encryptedIdTokenCookie: string): Promise<Object> {
+    const idToken = decryptCookie(encKey, encryptedIdTokenCookie)
+    // TODO: Validate the ID token?
+    // TODO: handle decode errors
+    const decodedIdToken = jwt_decode<JwtPayload>(idToken)
+    return decodedIdToken
+}
+
+export { getUserInfoUsingEncryptedAccessToken, getUserInfoUsingPlainAccessToken, getUserInfoUsingIdToken }

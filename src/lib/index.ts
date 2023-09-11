@@ -23,7 +23,7 @@ import { ValidateRequestOptions } from './validateRequest'
 import { getEncryptedCookie, decryptCookie } from './cookieEncrypter'
 import { getCookiesForTokenResponse, getCookiesForUnset } from './cookieBuilder'
 import { getTokenEndpointResponse, refreshAccessToken } from './getToken'
-import { getUserInfoUsingEncryptedAccessToken, getUserInfoUsingPlainAccessToken } from './getUserInfo'
+import { getUserInfoUsingEncryptedAccessToken, getUserInfoUsingPlainAccessToken, getUserInfoUsingIdToken } from './getUserInfo'
 import getIDTokenClaims from './getIDTokenClaims'
 import getRedirectUri from './redirectUri'
 import getLogoutURL from './getLogoutURL'
@@ -45,6 +45,7 @@ export {
     getTokenEndpointResponse,
     getUserInfoUsingPlainAccessToken,
     getUserInfoUsingEncryptedAccessToken,
+    getUserInfoUsingIdToken,
     getIDTokenClaims,
     getRedirectUri,
     getLogoutURL,
