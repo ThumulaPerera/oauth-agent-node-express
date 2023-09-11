@@ -15,7 +15,6 @@
  */
 
 import * as express from 'express'
-// import {config} from '../config'
 import {serverConfig} from '../serverConfig'
 import {
     decryptCookie, getAuthCookieName, getCookiesForTokenResponse, refreshAccessToken, validateIDtoken, ValidateRequestOptions, configManager

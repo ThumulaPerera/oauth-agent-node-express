@@ -21,7 +21,6 @@ import * as fs from 'fs'
 import * as https from 'https'
 import {
     LoginController,
-    UserInfoController,
     ClaimsController,
     LogoutController,
     RefreshTokenController
@@ -50,7 +49,6 @@ app.set('etag', false)
 const controllers = {
     '/login': new LoginController(),
     '/userInfo': new ClaimsController(),
-    // '/claims': new ClaimsController(),
     '/logout': new LogoutController(),
     // '/refresh': new RefreshTokenController()
 }

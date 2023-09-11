@@ -32,12 +32,6 @@ class ClaimsController {
 
         const config = await configManager.getConfigForRequest(req)
 
-        // Verify the web origin
-        // const options = new ValidateRequestOptions()
-        // options.requireCsrfHeader = false;
-        // options.requireTrustedOrigin = serverConfig.corsEnabled;
-        // validateExpressRequest(req, options, config, serverConfig)
-
         const idTokenCookieName = getIDCookieName(serverConfig.cookieNamePrefix)
         if (req.cookies && req.cookies[idTokenCookieName]) {
 

@@ -16,9 +16,8 @@
 
 import * as express from 'express'
 import {serverConfig} from '../serverConfig'
-import {getATCookieName, getCookiesForUnset, getLogoutURL, ValidateRequestOptions, decryptCookie, getIDCookieName, getIDTokenClaims, configManager} from '../lib'
+import {getATCookieName, getCookiesForUnset, getLogoutURL, decryptCookie, getIDCookieName, configManager} from '../lib'
 import {InvalidCookieException} from '../lib/exceptions'
-import validateExpressRequest from '../validateExpressRequest'
 import {asyncCatch} from '../middleware/exceptionMiddleware';
 
 class LogoutController {
@@ -27,16 +26,11 @@ class LogoutController {
     constructor() {
         this.router.get('/', asyncCatch(this.startLogoutUser))
         this.router.get('/callback', asyncCatch(this.handlePostLogout))
-        // this.router.post('/', asyncCatch(this.logoutUser))
     }
 
     startLogoutUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
         const config = await configManager.getConfigForRequest(req)
-        
-        // Check for an allowed origin and the presence of a CSRF token
-        // const options = new ValidateRequestOptions()
-        // validateExpressRequest(req, options)
 
         if (req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)] && req.cookies[getIDCookieName(serverConfig.cookieNamePrefix)]) {
 
@@ -62,25 +56,6 @@ class LogoutController {
         res.setHeader('Location', config.postLogoutRedirectUrl)
         res.status(302).send()
     }
-
-    // logoutUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-
-    //     // Check for an allowed origin and the presence of a CSRF token
-    //     const options = new ValidateRequestOptions()
-    //     validateExpressRequest(req, options)
-
-    //     if (req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)]) {
-
-    //         const logoutURL = getLogoutURL(config)
-    //         res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
-    //         res.json({ url: logoutURL})
-
-    //     } else {
-    //         const error = new InvalidCookieException()
-    //         error.logInfo = 'No auth cookie was supplied in a logout call'
-    //         throw error
-    //     }
-    // }
 }
 
 export default LogoutController
