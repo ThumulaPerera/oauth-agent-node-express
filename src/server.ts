@@ -49,7 +49,7 @@ app.set('etag', false)
 
 const controllers = {
     '/login': new LoginController(),
-    '/userInfo': new UserInfoController(),
+    '/userInfo': new ClaimsController(),
     // '/claims': new ClaimsController(),
     '/logout': new LogoutController(),
     // '/refresh': new RefreshTokenController()
