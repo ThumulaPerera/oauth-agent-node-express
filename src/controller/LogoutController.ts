@@ -38,7 +38,7 @@ class LogoutController {
             const idToken = decryptCookie(config.encKey, req.cookies[idTokenCookieName])
 
             const logoutURL = getLogoutURL(config, idToken)
-            res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
+            res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix, serverConfig.endpointsPrefix))
             res.setHeader('Location', logoutURL)
             res.status(302).send()
 

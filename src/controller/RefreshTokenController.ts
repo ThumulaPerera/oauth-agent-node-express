@@ -35,8 +35,8 @@ class RefreshTokenController {
         const config = await configManager.getConfigForRequest(req)
 
         // Check for an allowed origin and the presence of a CSRF token
-        const options = new ValidateRequestOptions()
-        validateExpressRequest(req, options, config, serverConfig)
+        // const options = new ValidateRequestOptions()
+        // validateExpressRequest(req, options, config, serverConfig)
 
         const authCookieName = getAuthCookieName(serverConfig.cookieNamePrefix)
         if (req.cookies && req.cookies[authCookieName]) {
@@ -48,7 +48,7 @@ class RefreshTokenController {
                 validateIDtoken(config, tokenResponse.id_token)
             }
 
-            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, serverConfig)
+            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, serverConfig, false, undefined, false)
             res.setHeader('Set-Cookie', cookiesToSet)
             res.status(204).send()
 

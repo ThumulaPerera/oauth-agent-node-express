@@ -50,7 +50,7 @@ const controllers = {
     '/login': new LoginController(),
     '/userInfo': new ClaimsController(),
     '/logout': new LogoutController(),
-    // '/refresh': new RefreshTokenController()
+    '/refresh': new RefreshTokenController()
 }
 
 for (const [path, controller] of Object.entries(controllers)) {

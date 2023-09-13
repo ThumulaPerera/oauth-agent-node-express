@@ -62,7 +62,7 @@ function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration
     return cookies
 }
 
-function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: string): string[] {
+function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: string, endpointsPrefix: string): string[] {
 
     const cookieOptions = {
         ...options,
@@ -70,7 +70,7 @@ function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: s
     }
 
     return [
-        serialize(getAuthCookieName(cookieNamePrefix), "", cookieOptions),
+        serialize(getAuthCookieName(cookieNamePrefix), "", { ...cookieOptions, path: endpointsPrefix + '/refresh' }),
         serialize(getATCookieName(cookieNamePrefix), "", cookieOptions),
         serialize(getIDCookieName(cookieNamePrefix), "", cookieOptions),
         serialize(getCSRFCookieName(cookieNamePrefix), "", cookieOptions)
