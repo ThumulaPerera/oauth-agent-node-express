@@ -1,6 +1,6 @@
 import * as express from 'express'
 import AppConfiguration from './appConfiguration';
-import { getRedisClient } from './redisClient';
+import redisClient from './redisClient';
 import { getRedisKey } from './getRedisKey';
 import {config as defaultConfig} from '../appConfig'
 
@@ -10,8 +10,8 @@ class ConfigManager {
     }
 
     async getConfig(key:string): Promise<AppConfiguration> {
-        const redisClient = await getRedisClient()
-        const result = await redisClient.hGetAll(key);
+        const result = await redisClient.hgetall(key);
+        console.log('result', result)
         const config = AppConfiguration.create(result)
         if (!config) {
             // TODO: currently this sends 500. Try to handle more gracefully
