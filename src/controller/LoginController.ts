@@ -21,6 +21,7 @@ import {
     handleAuthorizationResponse,
     validateIDtoken,
     decryptCookie,
+    encryptCookie,
     getCSRFCookieName,
     getTokenEndpointResponse,
     getTempLoginDataCookie,
@@ -28,6 +29,9 @@ import {
     getCookiesForTokenResponse,
     generateRandomString,
     configManager,
+    tokenPersistenceManager,
+    getSessionIdCookie,
+    
 } from '../lib'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
 
@@ -93,7 +97,18 @@ class LoginController {
                 csrfToken = generateRandomString()
             }
 
-            const cookiesToSet = getCookiesForTokenResponse(tokenResponse, config, serverConfig, true, csrfToken, false)
+            let cookiesToSet = []
+            if (serverConfig.sessionStorage === 'redis') {
+                // store the tokens in redis
+                const sessionId: string = await tokenPersistenceManager.saveTokens({
+                    idToken: encryptCookie(config.encKey, tokenResponse.id_token),
+                    refreshToken: encryptCookie(config.encKey, tokenResponse.refresh_token) // TODO: handle null cases
+                })
+                // add session id to cookies
+                cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))
+            }
+
+            cookiesToSet.push(...getCookiesForTokenResponse(tokenResponse, config, serverConfig, true, csrfToken, false))
             res.set('Set-Cookie', cookiesToSet)
             res.setHeader('Location', config.postLoginRedirectUrl)
         } else {

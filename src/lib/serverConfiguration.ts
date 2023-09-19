@@ -16,7 +16,9 @@
 
 import {CookieSerializeOptions} from 'cookie'
 
-export default class ServerConfiguration {
+export type SessionStorageType = 'cookie' | 'redis'
+
+export class ServerConfiguration {
 
     // Host settings
     public port: string
@@ -30,6 +32,8 @@ export default class ServerConfiguration {
     public corsEnabled: boolean
     public cookieOptions: CookieSerializeOptions
 
+    public sessionStorage: SessionStorageType
+
     constructor(
         port: string,
         endpointsPrefix: string,
@@ -38,7 +42,8 @@ export default class ServerConfiguration {
         cookieNamePrefix: string,
         trustedWebOrigins: string[],
         corsEnabled: boolean,
-        cookieOptions?: CookieSerializeOptions,) {
+        cookieOptions?: CookieSerializeOptions,
+        sessionStorage?: string) {
 
         this.port = port
         this.endpointsPrefix = endpointsPrefix
@@ -53,5 +58,6 @@ export default class ServerConfiguration {
             secure: true,
             sameSite: true
         } as CookieSerializeOptions
+        this.sessionStorage = sessionStorage ? sessionStorage as SessionStorageType : 'cookie'
     }
 }

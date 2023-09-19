@@ -16,7 +16,7 @@
 
 import * as express from 'express'
 import {serverConfig} from '../serverConfig'
-import {getATCookieName, getCookiesForUnset, getLogoutURL, decryptCookie, getIDCookieName, configManager} from '../lib'
+import {getATCookieName, getCookiesForUnset, getLogoutURL, decryptCookie, getIDCookieName, configManager, getSessionIdCookieName, tokenPersistenceManager} from '../lib'
 import {InvalidCookieException} from '../lib/exceptions'
 import {asyncCatch} from '../middleware/exceptionMiddleware';
 
@@ -32,21 +32,41 @@ class LogoutController {
 
         const config = await configManager.getConfigForRequest(req)
 
-        if (req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)] && req.cookies[getIDCookieName(serverConfig.cookieNamePrefix)]) {
+        let idToken
+        if (serverConfig.sessionStorage === 'cookie') {
+            if (req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)] && req.cookies[getIDCookieName(serverConfig.cookieNamePrefix)]) {
 
-            const idTokenCookieName = getIDCookieName(serverConfig.cookieNamePrefix)
-            const idToken = decryptCookie(config.encKey, req.cookies[idTokenCookieName])
-
-            const logoutURL = getLogoutURL(config, idToken)
-            res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix, serverConfig.endpointsPrefix))
-            res.setHeader('Location', logoutURL)
-            res.status(302).send()
-
-        } else {
-            const error = new InvalidCookieException()
-            error.logInfo = 'No auth cookie was supplied in a logout call'
-            throw error
+                const idTokenCookieName = getIDCookieName(serverConfig.cookieNamePrefix)
+                idToken = decryptCookie(config.encKey, req.cookies[idTokenCookieName])
+            } else {
+                const error = new InvalidCookieException()
+                error.logInfo = 'No auth cookie was supplied in a logout call'
+                throw error
+            }
+        } else if (serverConfig.sessionStorage === 'redis') {
+            if (req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)] && req.cookies[getSessionIdCookieName(serverConfig.cookieNamePrefix)]) {
+                const sessionId = req.cookies[getSessionIdCookieName(serverConfig.cookieNamePrefix)]
+                const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
+                if (savedTokens) {
+                    idToken = decryptCookie(config.encKey, savedTokens.idToken)
+                    // delete the tokens from redis
+                    await tokenPersistenceManager.deleteTokens(sessionId)
+                } else {
+                    // TODO: throw a better exception
+                    const error = new InvalidCookieException()
+                    error.logInfo = 'No tokens were found in redis for the session id supplied in a logout call'
+                    throw error
+                }
+            } else {
+                const error = new InvalidCookieException()
+                error.logInfo = 'No session id cookie was supplied in a logout call'
+                throw error
+            }
         }
+        const logoutURL = getLogoutURL(config, idToken)
+        res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix, serverConfig.endpointsPrefix))
+        res.setHeader('Location', logoutURL)
+        res.status(302).send()
     }
 
     handlePostLogout = async (req: express.Request, res: express.Response, next: express.NextFunction) => {

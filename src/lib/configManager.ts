@@ -2,7 +2,6 @@ import * as express from 'express'
 import AppConfiguration from './appConfiguration';
 import { hgetallWithRetry } from './redisClient';
 import { getRedisKey } from './getRedisKey';
-import {config as defaultConfig} from '../appConfig'
 
 class ConfigManager {
     async getConfigForRequest(req: express.Request): Promise<AppConfiguration> {

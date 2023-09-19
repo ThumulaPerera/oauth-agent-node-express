@@ -15,32 +15,37 @@
  */
 
 import AppConfiguration from './appConfiguration'
-import ServerConfiguration from './serverConfiguration'
+import { ServerConfiguration, SessionStorageType } from './serverConfiguration'
 import { createAuthorizationRequest, handleAuthorizationResponse } from './loginHandler'
 import { validateIDtoken } from './idTokenValidator'
 import { ClientOptions } from './clientOptions'
 import { ValidateRequestOptions } from './validateRequest'
-import { getEncryptedCookie, decryptCookie } from './cookieEncrypter'
-import { getCookiesForTokenResponse, getCookiesForUnset } from './cookieBuilder'
+import { getEncryptedCookie, decryptCookie, encryptCookie } from './cookieEncrypter'
+import { getCookiesForTokenResponse, getCookiesForUnset, getSessionIdCookie } from './cookieBuilder'
 import { getTokenEndpointResponse, refreshAccessToken } from './getToken'
 import getIDTokenClaims from './getIDTokenClaims'
 import getRedirectUri from './redirectUri'
 import getLogoutURL from './getLogoutURL'
 import { getTempLoginDataCookie, getTempLoginDataCookieForUnset, generateRandomString } from './pkce'
-import { getAuthCookieName, getIDCookieName, getCSRFCookieName, getATCookieName, getTempLoginDataCookieName } from './cookieName'
+import { getAuthCookieName, getIDCookieName, getCSRFCookieName, getATCookieName, getTempLoginDataCookieName, getSessionIdCookieName } from './cookieName'
 import configManager from './configManager'
+import { tokenPersistenceManager, SavedTokens } from './tokenPersistenceManager'
 
 export {
     AppConfiguration,
     ServerConfiguration,
+    SessionStorageType,
     ClientOptions,
     ValidateRequestOptions,
     configManager,
+    tokenPersistenceManager,
+    SavedTokens,
     createAuthorizationRequest,
     handleAuthorizationResponse,
     validateIDtoken,
     getEncryptedCookie,
     decryptCookie,
+    encryptCookie,
     getTokenEndpointResponse,
     getIDTokenClaims,
     getRedirectUri,
@@ -50,10 +55,12 @@ export {
     getTempLoginDataCookieForUnset,
     getTempLoginDataCookie,
     getCookiesForTokenResponse,
+    getSessionIdCookie,
     getATCookieName,
     getTempLoginDataCookieName,
     getCSRFCookieName,
     getIDCookieName,
     getAuthCookieName,
+    getSessionIdCookieName,
     generateRandomString,
 }

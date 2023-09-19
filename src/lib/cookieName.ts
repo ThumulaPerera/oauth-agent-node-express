@@ -19,5 +19,6 @@ const getAuthCookieName = (cookieNamePrefix: string): string => cookieNamePrefix
 const getATCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_at'
 const getIDCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_id'
 const getCSRFCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_csrf'
+const getSessionIdCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_sessionid'
 
-export {getTempLoginDataCookieName, getATCookieName, getAuthCookieName, getIDCookieName, getCSRFCookieName}
+export {getTempLoginDataCookieName, getATCookieName, getAuthCookieName, getIDCookieName, getCSRFCookieName, getSessionIdCookieName}

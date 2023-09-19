@@ -17,8 +17,8 @@
 import {CookieSerializeOptions, serialize} from 'cookie'
 import {getEncryptedCookie} from './cookieEncrypter'
 import AppConfiguration from './appConfiguration'
-import ServerConfiguration from './serverConfiguration'
-import {getATCookieName, getAuthCookieName, getCSRFCookieName, getIDCookieName} from './cookieName'
+import {ServerConfiguration} from './serverConfiguration'
+import {getATCookieName, getAuthCookieName, getCSRFCookieName, getIDCookieName, getSessionIdCookieName} from './cookieName'
 import {getTempLoginDataCookieForUnset} from './pkce'
 
 const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
@@ -42,24 +42,31 @@ function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration
         cookies.push(getTempLoginDataCookieForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
     }
 
-    if (tokenResponse.refresh_token) {
-        const refreshTokenCookieOptions = {
-            ...serverConfig.cookieOptions,
-            path: serverConfig.endpointsPrefix + '/refresh'
-        }
-        cookies.push(getEncryptedCookie(refreshTokenCookieOptions, tokenResponse.refresh_token, getAuthCookieName(serverConfig.cookieNamePrefix), config.encKey))
-    }
+    if (serverConfig.sessionStorage === 'cookie') {
 
-    if (tokenResponse.id_token) {
-        // TODO: see if we can limit access to a path
-        // const idTokenCookieOptions = {
-        //     ...serverConfig.cookieOptions,
-        //     path: serverConfig.endpointsPrefix + '/claims'
-        // }
-        cookies.push(getEncryptedCookie(serverConfig.cookieOptions, tokenResponse.id_token, getIDCookieName(serverConfig.cookieNamePrefix), config.encKey))
+        if (tokenResponse.refresh_token) {
+            const refreshTokenCookieOptions = {
+                ...serverConfig.cookieOptions,
+                path: serverConfig.endpointsPrefix + '/refresh'
+            }
+            cookies.push(getEncryptedCookie(refreshTokenCookieOptions, tokenResponse.refresh_token, getAuthCookieName(serverConfig.cookieNamePrefix), config.encKey))
+        }
+
+        if (tokenResponse.id_token) {
+            // TODO: see if we can limit access to a path
+            // const idTokenCookieOptions = {
+            //     ...serverConfig.cookieOptions,
+            //     path: serverConfig.endpointsPrefix + '/claims'
+            // }
+            cookies.push(getEncryptedCookie(serverConfig.cookieOptions, tokenResponse.id_token, getIDCookieName(serverConfig.cookieNamePrefix), config.encKey))
+        }
     }
 
     return cookies
+}
+
+function getSessionIdCookie(sessionId: string, serverConfig: ServerConfiguration): string {
+    return serialize(getSessionIdCookieName(serverConfig.cookieNamePrefix), sessionId, serverConfig.cookieOptions)
 }
 
 function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: string, endpointsPrefix: string): string[] {
@@ -73,8 +80,9 @@ function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: s
         serialize(getAuthCookieName(cookieNamePrefix), "", { ...cookieOptions, path: endpointsPrefix + '/refresh' }),
         serialize(getATCookieName(cookieNamePrefix), "", cookieOptions),
         serialize(getIDCookieName(cookieNamePrefix), "", cookieOptions),
-        serialize(getCSRFCookieName(cookieNamePrefix), "", cookieOptions)
+        serialize(getCSRFCookieName(cookieNamePrefix), "", cookieOptions),
+        serialize(getSessionIdCookieName(cookieNamePrefix), "", cookieOptions),
     ]
 }
 
-export { getCookiesForTokenResponse, getCookiesForUnset };
+export { getCookiesForTokenResponse, getCookiesForUnset, getSessionIdCookie };
