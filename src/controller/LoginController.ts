@@ -39,7 +39,7 @@ class LoginController {
     public router = express.Router()
 
     constructor() {
-        this.router.get('/start', asyncCatch(this.getStartLogin))
+        this.router.get('/', asyncCatch(this.getStartLogin))
         this.router.get('/callback', asyncCatch(this.handleCallback))
     }
 
