@@ -20,14 +20,31 @@ The SPA calls these endpoints via one liners, to perform its OAuth work:
 
 | Endpoint | Description |
 | -------- | ----------- |
-| POST /oauth-agent/login/start | Start a login by providing the request URL to the SPA and setting temporary cookies |
-| POST /oauth-agent/login/end | Complete a login and issuing secure cookies for the SPA containing encrypted tokens |
-| GET /oauth-agent/userInfo | Return information from the User Info endpoint for the SPA to display |
-| GET /oauth-agent/claims | Return ID token claims such as `auth_time` and `acr` |
-| POST /oauth-agent/refresh | Refresh an access token and rewrite cookies |
-| POST /oauth-agent/logout | Clear cookies and return an end session request URL |
+| GET /auth/login | Start a login by redirecting to authorize endpoint of IdP and setting temporary cookies |
+| GET /auth/login/callback | Complete a login, store tokens and return userinfo to the SPA in a header |
+| GET /auth/userInfo | Return ID token claims such as `auth_time` and `acr` |
+| POST /auth/refresh | Refresh an access token and restore tokens |
+| POST /auth/logout | Clear tokens and redirect to OIDC logout endpoint of IdP |
 
-For further details see the [Architecture](/doc/Architecture.md) article.
+## Token Storage
+
+### Access tokens
+
+Access tokens are stored unencrypted in a secure, http-only, samesite browser cookie.
+
+### ID tokens and refresh tokens
+
+2 storage options are available for storing ID token and refresh tokens; `cookie` or `redis`. The default storage option is cookie. This can be configured by setting the environment variable `SESSION_STORAGE`.
+
+If redis is configured as the storage option, redis connection details must be configured using the following environment variables.
+
+- `REDIS_HOST` 
+- `REDIS_PORT`
+- `REDIS_USERNAME`
+- `REDIS_PASSWORD`
+
+The tokens will be encrypted in either case.
+
 
 ## Deployment
 
@@ -47,49 +64,21 @@ oauth-agent:
   hostname: oauthagent-host
   environment:
     PORT: 3001
-    TRUSTED_WEB_ORIGIN: 'https://www.example.com'
-    ISSUER: 'https://login.example.com/oauth/v2/oauth-anonymous'
-    AUTHORIZE_ENDPOINT: 'https://login.example.com/oauth/v2/oauth-authorize'
-    TOKEN_ENDPOINT: 'https://login-internal/oauth/v2/oauth-token'
-    USERINFO_ENDPOINT: 'https://login-internal/oauth/v2/oauth-userinfo'
-    LOGOUT_ENDPOINT: 'https://login.example.com/oauth/v2/oauth-session/logout'
-    CLIENT_ID: 'spa-client'
-    CLIENT_SECRET: 'Password1'
-    REDIRECT_URI: 'https://www.example.com/'
-    POST_LOGOUT_REDIRECT_URI: 'https:www.example.com/'
-    SCOPE: 'openid profile'
-    COOKIE_DOMAIN: 'api.example.com'
-    COOKIE_NAME_PREFIX: 'example'
+    COOKIE_NAME_PREFIX: 'auth'
     COOKIE_ENCRYPTION_KEY: 'fda91643fce9af565bdc34cd965b48da75d1f5bd8846bf0910dd6d7b10f06dfe'
-    CORS_ENABLED: 'true'
-    SERVER_CERT_P12_PATH: '/certs/my.p12'
-    SERVER_CERT_P12_PASSWORD: 'Password1'
+    SESSION_STORAGE: cookie
 ```
 
-If the OAuth Agent is deployed to the web domain, then set these properties:
+<!-- If the OAuth Agent is deployed to the web domain, then set these properties:
 
 ```yaml
 COOKIE_DOMAIN: 'www.example.com'
 CORS_ENABLED: 'false'
 ```
 
-In development setups, HTTP URLs can be used and certificate values left blank.
+In development setups, HTTP URLs can be used and certificate values left blank. -->
 
 ## OAuth Agent Development
 
 See the [Setup](/doc/Setup.md) article for details on productive OAuth Agent development.\
 This enables a test driven approach to developing the OAuth Agent, without the need for a browser.
-
-## End-to-End SPA Flow
-
-See the below article for details on how to run the end-to-end solution in a browser:
-
-- [SPA Code Example](https://curity.io/resources/learn/token-handler-spa-example/)
-
-## Website Documentation
-
-See the [Curity OAuth for Web Home Page](https://curity.io/product/token-service/oauth-for-web/) for all resources on this design pattern.
-
-## More Information
-
-Please visit [curity.io](https://curity.io/) for more information about the Curity Identity Server.
