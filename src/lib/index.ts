@@ -21,9 +21,9 @@ import { validateIDtoken } from './idTokenValidator'
 import { ClientOptions } from './clientOptions'
 import { ValidateRequestOptions } from './validateRequest'
 import { getEncryptedCookie, decryptCookie, encryptCookie } from './cookieEncrypter'
-import { getCookiesForTokenResponse, getCookiesForUnset, getSessionIdCookie } from './cookieBuilder'
+import { getCookiesForTokenResponse, getCookiesForUnset, getSessionIdCookie, getIdTokenCookie } from './cookieBuilder'
 import { getTokenEndpointResponse, refreshAccessToken } from './getToken'
-import getIDTokenClaims from './getIDTokenClaims'
+import { getClaimsFromEncryptedIdToken, getClaimsFromIdToken } from './getIDTokenClaims'
 import getRedirectUri from './redirectUri'
 import getLogoutURL from './getLogoutURL'
 import { getTempLoginDataCookie, getTempLoginDataCookieForUnset, generateRandomString } from './pkce'
@@ -47,7 +47,8 @@ export {
     decryptCookie,
     encryptCookie,
     getTokenEndpointResponse,
-    getIDTokenClaims,
+    getClaimsFromEncryptedIdToken,
+    getClaimsFromIdToken,
     getRedirectUri,
     getLogoutURL,
     refreshAccessToken,
@@ -56,6 +57,7 @@ export {
     getTempLoginDataCookie,
     getCookiesForTokenResponse,
     getSessionIdCookie,
+    getIdTokenCookie,
     getATCookieName,
     getTempLoginDataCookieName,
     getCSRFCookieName,

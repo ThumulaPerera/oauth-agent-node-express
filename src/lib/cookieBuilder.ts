@@ -18,13 +18,13 @@ import {CookieSerializeOptions, serialize} from 'cookie'
 import {getEncryptedCookie} from './cookieEncrypter'
 import AppConfiguration from './appConfiguration'
 import {ServerConfiguration} from './serverConfiguration'
-import {getATCookieName, getAuthCookieName, getCSRFCookieName, getIDCookieName, getSessionIdCookieName} from './cookieName'
+import {getATCookieName, getAuthCookieName, getCSRFCookieName, getIDCookieName, getSessionIdCookieName, getPlainIdTokenCookieName} from './cookieName'
 import {getTempLoginDataCookieForUnset} from './pkce'
 
 const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
 
 function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration, serverConfig: ServerConfiguration, unsetTempLoginDataCookie: boolean = false, csrfCookieValue?: string, encryptAccessToken: boolean = true): string[] {
-    
+
     const accessTokenCookie = encryptAccessToken ? 
         getEncryptedCookie(serverConfig.cookieOptions, tokenResponse.access_token, getATCookieName(serverConfig.cookieNamePrefix), config.encKey) 
         : 
@@ -69,6 +69,17 @@ function getSessionIdCookie(sessionId: string, serverConfig: ServerConfiguration
     return serialize(getSessionIdCookieName(serverConfig.cookieNamePrefix), sessionId, serverConfig.cookieOptions)
 }
 
+function getIdTokenCookie(idToken: string, serverConfig: ServerConfiguration, config: AppConfiguration): string {
+    const idTokenCookieOptions = {
+        ...serverConfig.cookieOptions,
+        // set httpOnly to false so that the SPA can read the cookie
+        httpOnly: false,
+        // set path to post login redirect url path set by web app
+        path: config.postLoginRedirectUrl
+    }
+    return serialize(getPlainIdTokenCookieName(), idToken, idTokenCookieOptions)
+}
+
 function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: string, endpointsPrefix: string): string[] {
 
     const cookieOptions = {
@@ -85,4 +96,4 @@ function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: s
     ]
 }
 
-export { getCookiesForTokenResponse, getCookiesForUnset, getSessionIdCookie };
+export { getCookiesForTokenResponse, getCookiesForUnset, getSessionIdCookie, getIdTokenCookie };

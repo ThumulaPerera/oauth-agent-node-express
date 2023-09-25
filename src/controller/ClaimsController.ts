@@ -15,7 +15,7 @@
  */
 
 import * as express from 'express'
-import {getIDCookieName, getIDTokenClaims, ValidateRequestOptions, configManager, tokenPersistenceManager, getSessionIdCookieName} from '../lib'
+import {getIDCookieName, getClaimsFromEncryptedIdToken, ValidateRequestOptions, configManager, tokenPersistenceManager, getSessionIdCookieName} from '../lib'
 import {serverConfig} from '../serverConfig'
 import validateExpressRequest from '../validateExpressRequest'
 import {InvalidCookieException} from '../lib/exceptions'
@@ -37,7 +37,7 @@ class ClaimsController {
             const idTokenCookieName = getIDCookieName(serverConfig.cookieNamePrefix)
             if (req.cookies && req.cookies[idTokenCookieName]) {
     
-                const userData = getIDTokenClaims(config.encKey, req.cookies[idTokenCookieName])
+                const userData = getClaimsFromEncryptedIdToken(config.encKey, req.cookies[idTokenCookieName])
                 res.status(200).json(userData)
     
             } else {
@@ -52,7 +52,7 @@ class ClaimsController {
                 console.log('Session ID: ' + sessionId)
                 const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
                 if (savedTokens) {
-                    const userData = getIDTokenClaims(config.encKey, savedTokens.idToken)
+                    const userData = getClaimsFromEncryptedIdToken(config.encKey, savedTokens.idToken)
                     res.status(200).json(userData)
                 } else {
                     // TODO: throw a better exception

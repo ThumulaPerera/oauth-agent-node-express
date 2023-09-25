@@ -27,11 +27,12 @@ import {
     getTempLoginDataCookie,
     getTempLoginDataCookieName,
     getCookiesForTokenResponse,
+    getIdTokenCookie,
     generateRandomString,
     configManager,
     tokenPersistenceManager,
     getSessionIdCookie,
-    
+    getClaimsFromIdToken,
 } from '../lib'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
 
@@ -49,7 +50,9 @@ class LoginController {
 
         const authorizationRequestData = createAuthorizationRequest(config, req.body)
 
-        const tempLoginDataCookieOptions = serverConfig.cookieOptions
+        const tempLoginDataCookieOptions = {
+            ...serverConfig.cookieOptions,
+        }
         tempLoginDataCookieOptions.sameSite = 'lax'
 
         res.setHeader('Set-Cookie',
@@ -75,6 +78,9 @@ class LoginController {
             const tokenResponse = await getTokenEndpointResponse(config, data.code, data.state, tempLoginData)
             if (tokenResponse.id_token) {
                 validateIDtoken(config, tokenResponse.id_token)
+                // TODO: We should consider sending an error response if ID token is not present
+                // seems this is the right thing to do since we only consider the user as logged in when 
+                // userinfo is retrieved by the client web app. 
             }
 
             csrfToken = generateRandomString()
@@ -109,8 +115,21 @@ class LoginController {
             }
 
             cookiesToSet.push(...getCookiesForTokenResponse(tokenResponse, config, serverConfig, true, csrfToken, false))
+            
+            const claims = getClaimsFromIdToken(tokenResponse.id_token)
+            const encodedClaims = Buffer.from(JSON.stringify(claims), 'utf8').toString('base64')
+            
+            cookiesToSet.push(getIdTokenCookie(encodedClaims, serverConfig, config))
+
             res.set('Set-Cookie', cookiesToSet)
-            res.setHeader('Location', config.postLoginRedirectUrl)
+
+            // If token response does not contain ID token, we should have returned an error response
+            // convert claims to a base64 encoded JSON string
+            // const encodedClaims = Buffer.from(JSON.stringify(claims), 'utf8').toString('base64');
+            // redirectLocation = `${redirectLocation}?claims=${encodedClaims}`
+            res.redirect(config.postLoginRedirectUrl)
+
+            // res.setHeader('Location', redirectLocation)
         } else {
             // TODO: handle error
         }
@@ -120,7 +139,8 @@ class LoginController {
             // responseBody.csrf = csrfToken
         // }
 
-        res.status(302).send()
+        // res.status(302).send()
+
     }
 }
 

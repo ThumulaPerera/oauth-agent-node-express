@@ -34,6 +34,7 @@ export default class AppConfiguration {
     public encKey: string
 
     // Post login, logout and error redirect URLs
+    // TODO: make these relative paths
     public postLoginRedirectUrl: string
     public postLogoutRedirectUrl: string
     public postErrorRedirectUrl: string

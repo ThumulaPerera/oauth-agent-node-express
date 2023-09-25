@@ -21,4 +21,7 @@ const getIDCookieName = (cookieNamePrefix: string): string => cookieNamePrefix +
 const getCSRFCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_csrf'
 const getSessionIdCookieName = (cookieNamePrefix: string): string => cookieNamePrefix + '_sessionid'
 
-export {getTempLoginDataCookieName, getATCookieName, getAuthCookieName, getIDCookieName, getCSRFCookieName, getSessionIdCookieName}
+// TODO: change the name to userinfo
+const getPlainIdTokenCookieName = (): string => 'id_token'
+
+export {getTempLoginDataCookieName, getATCookieName, getAuthCookieName, getIDCookieName, getCSRFCookieName, getSessionIdCookieName, getPlainIdTokenCookieName}
