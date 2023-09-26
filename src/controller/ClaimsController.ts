@@ -37,7 +37,7 @@ class ClaimsController {
             const idTokenCookieName = getIDCookieName(serverConfig.cookieNamePrefix)
             if (req.cookies && req.cookies[idTokenCookieName]) {
     
-                const userData = getClaimsFromEncryptedIdToken(config.encKey, req.cookies[idTokenCookieName])
+                const userData = getClaimsFromEncryptedIdToken(serverConfig.encKey, req.cookies[idTokenCookieName])
                 res.status(200).json(userData)
     
             } else {
@@ -52,7 +52,7 @@ class ClaimsController {
                 console.log('Session ID: ' + sessionId)
                 const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
                 if (savedTokens) {
-                    const userData = getClaimsFromEncryptedIdToken(config.encKey, savedTokens.idToken)
+                    const userData = getClaimsFromEncryptedIdToken(serverConfig.encKey, savedTokens.idToken)
                     res.status(200).json(userData)
                 } else {
                     // TODO: throw a better exception

@@ -37,7 +37,7 @@ class LogoutController {
             if (req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)] && req.cookies[getIDCookieName(serverConfig.cookieNamePrefix)]) {
 
                 const idTokenCookieName = getIDCookieName(serverConfig.cookieNamePrefix)
-                idToken = decryptCookie(config.encKey, req.cookies[idTokenCookieName])
+                idToken = decryptCookie(serverConfig.encKey, req.cookies[idTokenCookieName])
             } else {
                 const error = new InvalidCookieException()
                 error.logInfo = 'No auth cookie was supplied in a logout call'
@@ -48,7 +48,7 @@ class LogoutController {
                 const sessionId = req.cookies[getSessionIdCookieName(serverConfig.cookieNamePrefix)]
                 const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
                 if (savedTokens) {
-                    idToken = decryptCookie(config.encKey, savedTokens.idToken)
+                    idToken = decryptCookie(serverConfig.encKey, savedTokens.idToken)
                     // delete the tokens from redis
                     await tokenPersistenceManager.deleteTokens(sessionId)
                 } else {

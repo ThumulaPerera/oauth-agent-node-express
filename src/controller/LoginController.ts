@@ -56,7 +56,7 @@ class LoginController {
         tempLoginDataCookieOptions.sameSite = 'lax'
 
         res.setHeader('Set-Cookie',
-            getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, tempLoginDataCookieOptions, serverConfig.cookieNamePrefix, config.encKey))
+            getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, tempLoginDataCookieOptions, serverConfig.cookieNamePrefix, serverConfig.encKey))
         res.setHeader('Location', authorizationRequestData.authorizationRequestURL)
         res.status(302).send()
     }
@@ -75,7 +75,7 @@ class LoginController {
 
             const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(serverConfig.cookieNamePrefix)] : undefined
 
-            const tokenResponse = await getTokenEndpointResponse(config, data.code, data.state, tempLoginData)
+            const tokenResponse = await getTokenEndpointResponse(config, serverConfig, data.code, data.state, tempLoginData)
             if (tokenResponse.id_token) {
                 validateIDtoken(config, tokenResponse.id_token)
                 // TODO: We should consider sending an error response if ID token is not present
@@ -89,7 +89,7 @@ class LoginController {
 
                 try {
                     // Avoid setting a new value if the user opens two browser tabs and signs in on both
-                    csrfToken = decryptCookie(config.encKey, csrfCookie)
+                    csrfToken = decryptCookie(serverConfig.encKey, csrfCookie)
 
                 } catch (e) {
 
@@ -107,8 +107,8 @@ class LoginController {
             if (serverConfig.sessionStorage === 'redis') {
                 // store the tokens in redis
                 const sessionId: string = await tokenPersistenceManager.saveTokens({
-                    idToken: encryptCookie(config.encKey, tokenResponse.id_token),
-                    refreshToken: encryptCookie(config.encKey, tokenResponse.refresh_token) // TODO: handle null cases
+                    idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
+                    refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) // TODO: handle null cases
                 })
                 // add session id to cookies
                 cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))

@@ -17,15 +17,16 @@
 import fetch from 'node-fetch'
 import {decryptCookie} from './cookieEncrypter'
 import {Grant} from './grant'
+import {ServerConfiguration} from './serverConfiguration'
 import AppConfiguration from './appConfiguration'
 import {OAuthAgentException, InvalidStateException, MissingTempLoginDataException, AuthorizationClientException, AuthorizationServerException} from './exceptions'
 
-async function getTokenEndpointResponse(config: AppConfiguration, code: string, state: string, tempLoginData: string | undefined | null, ): Promise<any> {
+async function getTokenEndpointResponse(config: AppConfiguration, serverConfig: ServerConfiguration, code: string, state: string, tempLoginData: string | undefined | null, ): Promise<any> {
     if (!tempLoginData) {
         return Promise.reject(new MissingTempLoginDataException())
     }
 
-    const parsedTempLoginData = JSON.parse(decryptCookie(config.encKey, tempLoginData))
+    const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, tempLoginData))
 
     if (parsedTempLoginData.state !== state) {
         return Promise.reject(new InvalidStateException())

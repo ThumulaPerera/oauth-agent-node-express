@@ -20,13 +20,15 @@ import {getCSRFCookieName} from './lib'
 import * as express from 'express'
 
 export default function validateExpressRequest(req: express.Request, options: ValidateRequestOptions, config: AppConfiguration, serverConfig: ServerConfiguration) {
+    // TODO: check whether this function is used
+    // TODO: remove config input param
 
     const data = new ValidateRequestData(
         req.header('x-' + serverConfig.cookieNamePrefix + '-csrf'),
         req.cookies && req.cookies[getCSRFCookieName(serverConfig.cookieNamePrefix)],
         req.header('Origin'),
         serverConfig.trustedWebOrigins,
-        config.encKey,
+        serverConfig.encKey,
     )
 
     validateRequest(data, options)

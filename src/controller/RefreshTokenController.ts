@@ -45,7 +45,7 @@ class RefreshTokenController {
 
             const authCookieName = getAuthCookieName(serverConfig.cookieNamePrefix)
             if (req.cookies && req.cookies[authCookieName]) {  
-                refreshToken = decryptCookie(config.encKey, req.cookies[authCookieName])
+                refreshToken = decryptCookie(serverConfig.encKey, req.cookies[authCookieName])
             } else {
                 const error = new InvalidCookieException()
                 error.logInfo = 'No auth cookie was supplied in a token refresh call'
@@ -67,7 +67,7 @@ class RefreshTokenController {
                 const sessionId = req.cookies[sessionIdCookieName]
                 const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
                 if (savedTokens && savedTokens.refreshToken) {
-                    refreshToken = decryptCookie(config.encKey, savedTokens.refreshToken)
+                    refreshToken = decryptCookie(serverConfig.encKey, savedTokens.refreshToken)
                     try {
                         const tokenResponse = await refreshAccessToken(refreshToken, config)
                         if (tokenResponse.id_token) {
@@ -76,8 +76,8 @@ class RefreshTokenController {
                 
                         let cookiesToSet = []
                         await tokenPersistenceManager.saveTokensForSession({
-                            idToken: encryptCookie(config.encKey, tokenResponse.id_token),
-                            refreshToken: encryptCookie(config.encKey, tokenResponse.refresh_token) // TODO: handle null cases
+                            idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
+                            refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) // TODO: handle null cases
                         }, sessionId)
                         // add session id to cookies
                         cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))

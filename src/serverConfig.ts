@@ -21,11 +21,12 @@ const useSsl = !!process.env.SERVER_CERT_P12_PATH;
 
 export const serverConfig: ServerConfiguration = {
     
-    // Host settings
     port: process.env.PORT || '8080',
     endpointsPrefix: '/auth',
     serverCertPath: process.env.SERVER_CERT_P12_PATH || '',
     serverCertPassword: process.env.SERVER_CERT_P12_PASSWORD || '',
+
+    encKey: process.env.ENC_KEY || '4e4636356d65563e4c73233847503e3b21436e6f7629724950526f4b5e2e4e50',
 
     cookieNamePrefix: process.env.COOKIE_NAME_PREFIX || 'example',
     trustedWebOrigins: [process.env.TRUSTED_WEB_ORIGIN || 'http://www.example.local'],
@@ -34,8 +35,8 @@ export const serverConfig: ServerConfiguration = {
         httpOnly: true,
         sameSite: true,
         secure: useSsl,
-        // domain: process.env.COOKIE_DOMAIN || 'api.example.local',
         path: process.env.COOKIE_BASE_PATH || '/',
     } as CookieSerializeOptions,
+
     sessionStorage: process.env.SESSION_STORAGE ? process.env.SESSION_STORAGE as SessionStorageType : 'cookie'
 }

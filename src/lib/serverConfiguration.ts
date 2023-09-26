@@ -26,6 +26,9 @@ export class ServerConfiguration {
     public serverCertPath: string
     public serverCertPassword: string
 
+    // Encryption key for tokens (Other than access token)
+    public encKey: string
+
     // Secure cookie and CORS configuration
     public cookieNamePrefix: string
     public trustedWebOrigins: string[]
@@ -39,6 +42,7 @@ export class ServerConfiguration {
         endpointsPrefix: string,
         serverCertPath: string,
         serverCertPassword: string,
+        encKey: string,
         cookieNamePrefix: string,
         trustedWebOrigins: string[],
         corsEnabled: boolean,
@@ -50,6 +54,8 @@ export class ServerConfiguration {
         this.serverCertPath = serverCertPath
         this.serverCertPassword = serverCertPassword
 
+        this.encKey = encKey
+
         this.cookieNamePrefix = cookieNamePrefix ? cookieNamePrefix : "oauthagent"
         this.trustedWebOrigins = trustedWebOrigins
         this.corsEnabled = corsEnabled
@@ -58,6 +64,7 @@ export class ServerConfiguration {
             secure: true,
             sameSite: true
         } as CookieSerializeOptions
+
         this.sessionStorage = sessionStorage ? sessionStorage as SessionStorageType : 'cookie'
     }
 }

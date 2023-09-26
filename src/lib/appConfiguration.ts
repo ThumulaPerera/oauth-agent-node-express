@@ -30,9 +30,6 @@ export default class AppConfiguration {
     public tokenEndpoint: string
     public userInfoEndpoint: string
 
-    // Encryption key for cookies (other than access token)
-    public encKey: string
-
     // Post login, logout and error redirect URLs
     // TODO: make these relative paths
     public postLoginRedirectUrl: string
@@ -50,7 +47,6 @@ export default class AppConfiguration {
         logoutEndpoint: string,
         tokenEndpoint: string,
         userInfoEndpoint: string,
-        encKey: string,
         postLoginRedirectUrl: string,
         postLogoutRedirectUrl: string,
         postErrorRedirectUrl: string,) {
@@ -60,8 +56,6 @@ export default class AppConfiguration {
         this.redirectUri = redirectUri
         this.oidcPostLogoutRedirectUri = oidcPostLogoutRedirectUri
         this.scope = scope
-
-        this.encKey = encKey
 
         this.issuer = issuer
         this.authorizeEndpoint = authorizeEndpoint
@@ -85,7 +79,6 @@ export default class AppConfiguration {
         'logoutEndpoint',
         'tokenEndpoint',
         'userInfoEndpoint',
-        'encKey',
         'postLoginRedirectUrl',
         'postLogoutRedirectUrl',
         'postErrorRedirectUrl'
@@ -108,7 +101,6 @@ export default class AppConfiguration {
             params.logoutEndpoint,
             params.tokenEndpoint,
             params.userInfoEndpoint,
-            params.encKey,
             params.postLoginRedirectUrl,
             params.postLogoutRedirectUrl,
             params.postErrorRedirectUrl

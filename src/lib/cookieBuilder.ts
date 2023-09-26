@@ -26,7 +26,7 @@ const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
 function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration, serverConfig: ServerConfiguration, unsetTempLoginDataCookie: boolean = false, csrfCookieValue?: string, encryptAccessToken: boolean = true): string[] {
 
     const accessTokenCookie = encryptAccessToken ? 
-        getEncryptedCookie(serverConfig.cookieOptions, tokenResponse.access_token, getATCookieName(serverConfig.cookieNamePrefix), config.encKey) 
+        getEncryptedCookie(serverConfig.cookieOptions, tokenResponse.access_token, getATCookieName(serverConfig.cookieNamePrefix), serverConfig.encKey) 
         : 
         serialize(getATCookieName(serverConfig.cookieNamePrefix), tokenResponse.access_token, serverConfig.cookieOptions)
     
@@ -35,7 +35,7 @@ function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration
     ]
 
     if (csrfCookieValue) {
-        cookies.push(getEncryptedCookie(serverConfig.cookieOptions, csrfCookieValue, getCSRFCookieName(serverConfig.cookieNamePrefix), config.encKey))
+        cookies.push(getEncryptedCookie(serverConfig.cookieOptions, csrfCookieValue, getCSRFCookieName(serverConfig.cookieNamePrefix), serverConfig.encKey))
     }
 
     if (unsetTempLoginDataCookie) {
@@ -49,7 +49,7 @@ function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration
                 ...serverConfig.cookieOptions,
                 path: serverConfig.endpointsPrefix + '/refresh'
             }
-            cookies.push(getEncryptedCookie(refreshTokenCookieOptions, tokenResponse.refresh_token, getAuthCookieName(serverConfig.cookieNamePrefix), config.encKey))
+            cookies.push(getEncryptedCookie(refreshTokenCookieOptions, tokenResponse.refresh_token, getAuthCookieName(serverConfig.cookieNamePrefix), serverConfig.encKey))
         }
 
         if (tokenResponse.id_token) {
@@ -58,7 +58,7 @@ function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration
             //     ...serverConfig.cookieOptions,
             //     path: serverConfig.endpointsPrefix + '/claims'
             // }
-            cookies.push(getEncryptedCookie(serverConfig.cookieOptions, tokenResponse.id_token, getIDCookieName(serverConfig.cookieNamePrefix), config.encKey))
+            cookies.push(getEncryptedCookie(serverConfig.cookieOptions, tokenResponse.id_token, getIDCookieName(serverConfig.cookieNamePrefix), serverConfig.encKey))
         }
     }
 

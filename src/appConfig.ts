@@ -27,9 +27,6 @@ export const config: AppConfiguration = {
     oidcPostLogoutRedirectUri: process.env.ODIC_POST_LOGOUT_REDIRECT_URI || 'http://www.example.local/',
     scope: process.env.SCOPE || 'openid profile',
 
-    // Cookie related settings
-    encKey: process.env.COOKIE_ENCRYPTION_KEY || '4e4636356d65563e4c73233847503e3b21436e6f7629724950526f4b5e2e4e50',
-
     // Authorization Server settings
     issuer: process.env.ISSUER || 'http://login.example.local:8443/oauth/v2/oauth-anonymous',
     authorizeEndpoint: process.env.AUTHORIZE_ENDPOINT || 'http://login.example.local:8443/oauth/v2/oauth-authorize',
