@@ -60,7 +60,7 @@ class RefreshTokenController {
                     }, sessionId)
                     // add session id to cookies
                     cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))
-                    cookiesToSet.push(...getCookiesForTokenResponse(tokenResponse, config, serverConfig, false, false))
+                    cookiesToSet.push(...getCookiesForTokenResponse(tokenResponse, config, serverConfig, false))
                     res.set('Set-Cookie', cookiesToSet)
                     res.status(204).send()
                 } catch (e) {
