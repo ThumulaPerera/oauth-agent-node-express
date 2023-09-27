@@ -2,10 +2,15 @@
 import fetch, {RequestInit, Response} from 'node-fetch';
 import * as setCookie from 'set-cookie-parser';
 import * as urlParse from 'url-parse';
-import {config} from '../../src/config';
-import { ClientOptions } from '../../src/lib/clientOptions';
+// import {config as serverConfig} from '../../src/config';
+// import { ClientOptions } from '../../src/lib/clientOptions';
+import {serverConfig} from '../../src/serverConfig'
+import { xOriginalGwUrl } from './data';
+const request = require("supertest");
+import { testAppConfig } from './data';
+import app from '../../src/app'
 
-const oauthAgentBaseUrl = `http://localhost:${config.port}${config.endpointsPrefix}`
+const oauthAgentBaseUrl = `http://localhost:${serverConfig.port}${serverConfig.endpointsPrefix}`
 const wiremockAdminBaseUrl = `http://localhost:8443/__admin/mappings`
 
 /*
@@ -22,7 +27,7 @@ export async function performLogin(stateOverride: string = ''): Promise<[number,
     const options = {
         method: 'POST',
         headers: {
-            origin: config.trustedWebOrigins[0],
+            origin: serverConfig.trustedWebOrigins[0],
             'Content-Type': 'application/json',
             cookie: loginCookieString,
         },
@@ -69,12 +74,12 @@ export async function fetchStubbedResponse(stubbedResponse: any, fetchAction: ()
 /*
  * Do the work to start a login and get the temp cookie
  */
-export async function startLogin(requestBody: ClientOptions | null = null): Promise<[string, string]> {
+export async function startLogin(requestBody: any = null): Promise<[string, string]> {
 
     const requestOptions = {
         method: 'POST',
         headers: {
-            origin: config.trustedWebOrigins[0],
+            origin: serverConfig.trustedWebOrigins[0],
         },
     } as RequestInit
 
@@ -124,4 +129,20 @@ async function deleteStub(id: string): Promise<void> {
         console.log(responseData)
         throw new Error('Failed to delete Wiremock stub')
     }
+}
+
+export function parseCookieHeader(cookies: string[]): setCookie.Cookie[] {
+    return setCookie.parse(cookies)
+}
+
+export async function sendLoginRequest(): Promise<[number, setCookie.Cookie | undefined]> {
+
+    const response = await request(app)
+        .get('/auth/login')
+        .set('X-Original-GW-Url', xOriginalGwUrl)
+    
+    const cookies = parseCookieHeader(response.headers['set-cookie'])
+    const tempLoginDataCookie = cookies.find((c) => c.name === 'auth_login')
+
+    return [response.status, tempLoginDataCookie]
 }
