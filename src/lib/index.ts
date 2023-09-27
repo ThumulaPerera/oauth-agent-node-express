@@ -18,7 +18,6 @@ import AppConfiguration from './appConfiguration'
 import { ServerConfiguration } from './serverConfiguration'
 import { createAuthorizationRequest, handleAuthorizationResponse } from './loginHandler'
 import { validateIDtoken } from './idTokenValidator'
-import { ClientOptions } from './clientOptions'
 import { ValidateRequestOptions } from './validateRequest'
 import { getEncryptedCookie, decryptCookie, encryptCookie } from './cookieEncrypter'
 import { getCookiesForTokenResponse, getCookiesForUnset, getSessionIdCookie, getIdTokenCookie } from './cookieBuilder'
@@ -34,7 +33,6 @@ import { tokenPersistenceManager, SavedTokens } from './tokenPersistenceManager'
 export {
     AppConfiguration,
     ServerConfiguration,
-    ClientOptions,
     ValidateRequestOptions,
     configManager,
     tokenPersistenceManager,

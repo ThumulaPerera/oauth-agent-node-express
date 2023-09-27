@@ -48,7 +48,7 @@ class LoginController {
 
         const config = await configManager.getConfigForRequest(req)
 
-        const authorizationRequestData = createAuthorizationRequest(config, req.body)
+        const authorizationRequestData = createAuthorizationRequest(config)
 
         const tempLoginDataCookieOptions = {
             ...serverConfig.cookieOptions,

@@ -15,13 +15,12 @@
  */
 
 import * as urlparse from 'url-parse'
-import {ClientOptions} from './clientOptions';
 import AppConfiguration from './appConfiguration';
 import {generateHash, generateRandomString} from './pkce';
 import {AuthorizationRequestData} from './authorizationRequestData';
 import {AuthorizationResponseException} from './exceptions'
 
-export function createAuthorizationRequest(config: AppConfiguration, options?: ClientOptions): AuthorizationRequestData {
+export function createAuthorizationRequest(config: AppConfiguration): AuthorizationRequestData {
 
     const codeVerifier = generateRandomString()
     const state = generateRandomString()
@@ -33,14 +32,6 @@ export function createAuthorizationRequest(config: AppConfiguration, options?: C
         "&state=" + encodeURIComponent(state) +
         "&code_challenge=" + generateHash(codeVerifier) +
         "&code_challenge_method=S256"
-
-    if (options && options.extraParams) {
-        options.extraParams.forEach((p) => {
-            if (p.key && p.value) {
-                authorizationRequestUrl += `&${p.key}=${encodeURIComponent(p.value)}`
-            }
-        });
-    }
 
     if (config.scope) {
         authorizationRequestUrl += "&scope=" + encodeURIComponent(config.scope)
