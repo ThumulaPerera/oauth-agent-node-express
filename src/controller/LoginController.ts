@@ -20,15 +20,12 @@ import {
     createAuthorizationRequest,
     handleAuthorizationResponse,
     validateIDtoken,
-    decryptCookie,
     encryptCookie,
-    getCSRFCookieName,
     getTokenEndpointResponse,
     getTempLoginDataCookie,
     getTempLoginDataCookieName,
     getCookiesForTokenResponse,
     getIdTokenCookie,
-    generateRandomString,
     configManager,
     tokenPersistenceManager,
     getSessionIdCookie,
@@ -101,25 +98,12 @@ class LoginController {
             res.set('Set-Cookie', cookiesToSet)
 
             // If token response does not contain ID token, we should have returned an error response
-            // convert claims to a base64 encoded JSON string
-            // const encodedClaims = Buffer.from(JSON.stringify(claims), 'utf8').toString('base64');
-            // redirectLocation = `${redirectLocation}?claims=${encodedClaims}`
             res.redirect(config.postLoginRedirectUrl)
-
-            // res.setHeader('Location', redirectLocation)
         } else {
             // TODO: handle error
             // If IdP sends a error query param, it is handled by handleAuthorizationResponse and Error is thrown
             // This is reached if state or code is missing and there's no error as well
         }
-
-        // if (csrfToken) {
-            // TODO: send this in a header OR see if we can set this as a non-httponly cookie
-            // responseBody.csrf = csrfToken
-        // }
-
-        // res.status(302).send()
-
     }
 }
 
