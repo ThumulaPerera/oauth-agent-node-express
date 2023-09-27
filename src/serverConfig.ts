@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-import { ServerConfiguration, SessionStorageType } from 'lib';
+import { ServerConfiguration } from 'lib';
 import {CookieSerializeOptions} from 'cookie'
 
 const useSsl = !!process.env.SERVER_CERT_P12_PATH;
@@ -37,6 +37,4 @@ export const serverConfig: ServerConfiguration = {
         secure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : false,
         path: process.env.COOKIE_BASE_PATH || '/',
     } as CookieSerializeOptions,
-
-    sessionStorage: process.env.SESSION_STORAGE ? process.env.SESSION_STORAGE as SessionStorageType : 'cookie'
 }

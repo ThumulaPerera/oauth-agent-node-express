@@ -38,26 +38,6 @@ function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration
         cookies.push(getTempLoginDataCookieForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
     }
 
-    if (serverConfig.sessionStorage === 'cookie') {
-
-        if (tokenResponse.refresh_token) {
-            const refreshTokenCookieOptions = {
-                ...serverConfig.cookieOptions,
-                path: serverConfig.endpointsPrefix + '/refresh'
-            }
-            cookies.push(getEncryptedCookie(refreshTokenCookieOptions, tokenResponse.refresh_token, getAuthCookieName(serverConfig.cookieNamePrefix), serverConfig.encKey))
-        }
-
-        if (tokenResponse.id_token) {
-            // TODO: see if we can limit access to a path
-            // const idTokenCookieOptions = {
-            //     ...serverConfig.cookieOptions,
-            //     path: serverConfig.endpointsPrefix + '/claims'
-            // }
-            cookies.push(getEncryptedCookie(serverConfig.cookieOptions, tokenResponse.id_token, getIDCookieName(serverConfig.cookieNamePrefix), serverConfig.encKey))
-        }
-    }
-
     return cookies
 }
 

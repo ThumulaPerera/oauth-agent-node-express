@@ -15,7 +15,7 @@
  */
 
 import AppConfiguration from './appConfiguration'
-import { ServerConfiguration, SessionStorageType } from './serverConfiguration'
+import { ServerConfiguration } from './serverConfiguration'
 import { createAuthorizationRequest, handleAuthorizationResponse } from './loginHandler'
 import { validateIDtoken } from './idTokenValidator'
 import { ClientOptions } from './clientOptions'
@@ -34,7 +34,6 @@ import { tokenPersistenceManager, SavedTokens } from './tokenPersistenceManager'
 export {
     AppConfiguration,
     ServerConfiguration,
-    SessionStorageType,
     ClientOptions,
     ValidateRequestOptions,
     configManager,

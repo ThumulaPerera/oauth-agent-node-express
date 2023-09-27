@@ -82,15 +82,14 @@ class LoginController {
             }
 
             let cookiesToSet = []
-            if (serverConfig.sessionStorage === 'redis') {
-                // store the tokens in redis
-                const sessionId: string = await tokenPersistenceManager.saveTokens({
-                    idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
-                    refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) // TODO: handle null cases
-                })
-                // add session id to cookies
-                cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))
-            }
+
+            // store the tokens in redis
+            const sessionId: string = await tokenPersistenceManager.saveTokens({
+                idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
+                refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) // TODO: handle null cases
+            })
+            // add session id to cookies
+            cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))
 
             cookiesToSet.push(...getCookiesForTokenResponse(tokenResponse, config, serverConfig, true, false))
             

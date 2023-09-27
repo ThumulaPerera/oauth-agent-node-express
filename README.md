@@ -34,16 +34,14 @@ Access tokens are stored unencrypted in a secure, http-only, samesite browser co
 
 ### ID tokens and refresh tokens
 
-2 storage options are available for storing ID token and refresh tokens; `cookie` or `redis`. The default storage option is cookie. This can be configured by setting the environment variable `SESSION_STORAGE`.
+ID token and refresh tokens are encrypted and stored in a Redis. 
 
-If redis is configured as the storage option, redis connection details must be configured using the following environment variables.
+Redis connection details must be configured using the following environment variables.
 
 - `REDIS_HOST` 
 - `REDIS_PORT`
 - `REDIS_USERNAME`
 - `REDIS_PASSWORD`
-
-The tokens will be encrypted in either case.
 
 
 ## Deployment

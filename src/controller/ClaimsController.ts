@@ -33,38 +33,24 @@ class ClaimsController {
 
         const config = await configManager.getConfigForRequest(req)
 
-        if (serverConfig.sessionStorage === 'cookie') {
-            const idTokenCookieName = getIDCookieName(serverConfig.cookieNamePrefix)
-            if (req.cookies && req.cookies[idTokenCookieName]) {
-    
-                const userData = getClaimsFromEncryptedIdToken(serverConfig.encKey, req.cookies[idTokenCookieName])
+        const sessionIdCookieName = getSessionIdCookieName(serverConfig.cookieNamePrefix)
+        if (req.cookies && req.cookies[sessionIdCookieName]) {
+            const sessionId = req.cookies[sessionIdCookieName]
+            console.log('Session ID: ' + sessionId)
+            const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
+            if (savedTokens) {
+                const userData = getClaimsFromEncryptedIdToken(serverConfig.encKey, savedTokens.idToken)
                 res.status(200).json(userData)
-    
             } else {
+                // TODO: throw a better exception
                 const error = new InvalidCookieException()
-                error.logInfo = 'No ID cookie was supplied in a call to get claims'
+                error.logInfo = 'No tokens were found in redis for the session id supplied in a call to get claims'
                 throw error
             }
-        } else if (serverConfig.sessionStorage === 'redis') {
-            const sessionIdCookieName = getSessionIdCookieName(serverConfig.cookieNamePrefix)
-            if (req.cookies && req.cookies[sessionIdCookieName]) {
-                const sessionId = req.cookies[sessionIdCookieName]
-                console.log('Session ID: ' + sessionId)
-                const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
-                if (savedTokens) {
-                    const userData = getClaimsFromEncryptedIdToken(serverConfig.encKey, savedTokens.idToken)
-                    res.status(200).json(userData)
-                } else {
-                    // TODO: throw a better exception
-                    const error = new InvalidCookieException()
-                    error.logInfo = 'No tokens were found in redis for the session id supplied in a call to get claims'
-                    throw error
-                }
-            } else {
-                const error = new InvalidCookieException()
-                error.logInfo = 'No session ID cookie was supplied in a call to get claims'
-                throw error
-            }
+        } else {
+            const error = new InvalidCookieException()
+            error.logInfo = 'No session ID cookie was supplied in a call to get claims'
+            throw error
         }
     }
 }
