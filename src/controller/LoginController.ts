@@ -32,6 +32,7 @@ import {
     getClaimsFromIdToken,
 } from '../lib'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
+import { InvalidAuthorizationResponseException } from '../lib/exceptions';
 
 class LoginController {
     public router = express.Router()
@@ -78,16 +79,12 @@ class LoginController {
                 // userinfo is retrieved by the client web app. 
             }
 
-            // let cookiesToSet = []
-
             // store the tokens in redis
             const sessionId: string = await tokenPersistenceManager.saveTokens({
                 // TODO: ideally the method name should be encrypt
                 idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
                 refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) // TODO: handle null cases
             })
-            // add session id to cookies
-            // cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))
 
             // set access token and session id cookies
             let cookies = getCookiesForTokenResponse(tokenResponse, sessionId, serverConfig)
@@ -107,7 +104,8 @@ class LoginController {
         } else {
             // TODO: handle error
             // If IdP sends a error query param, it is handled by handleAuthorizationResponse and Error is thrown
-            // This is reached if state or code is missing and there's no error as well
+            // This is reached if state is present but neither code nor error is present in the query params
+            throw new InvalidAuthorizationResponseException('Invalid response from IdP')
         }
     }
 }

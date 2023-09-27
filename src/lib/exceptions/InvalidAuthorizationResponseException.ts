@@ -17,21 +17,16 @@
 import OAuthAgentException from './OAuthAgentException'
 
 // Thrown when the OpenId Connect response returns a URL like this:
-// https://www.example.com?state=state=nu2febouwefbjfewbj&error=invalid_scope&error_description=
+// https://www.example.com?state=nu2febouwefbjfewbj
+// i.e. state param is present but neither code nor error param is present
 export default class AuthorizationResponseException extends OAuthAgentException {
     public statusCode = 400
     public code: string
 
-    constructor(error: string, description: string) {
+    constructor(description: string) {
         super(description)
 
         // Return the error code to the browser, eg invalid_scope
-        this.code = error
-
-        // TODO: remove since this is not used
-        // Treat the prompt=none response as expiry related
-        if (this.code === 'login_required') {
-            this.statusCode = 401
-        }
+        this.code = 'invalid_authorization_response'
     }
 }
