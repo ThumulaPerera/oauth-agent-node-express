@@ -18,7 +18,7 @@ import * as urlparse from 'url-parse'
 import AppConfiguration from './appConfiguration';
 import {generateHash, generateRandomString} from './pkce';
 import {AuthorizationRequestData} from './authorizationRequestData';
-import {AuthorizationResponseException} from './exceptions'
+import {AuthorizationResponseException, MissingStateException} from './exceptions'
 
 export function createAuthorizationRequest(config: AppConfiguration): AuthorizationRequestData {
 
@@ -43,6 +43,10 @@ export function createAuthorizationRequest(config: AppConfiguration): Authorizat
 export async function handleAuthorizationResponse(pageUrl?: string): Promise<any> {
 
     const data = getUrlParts(pageUrl)
+
+    if (!data.state) {    
+        throw new MissingStateException()
+    }
 
     if (data.state && data.code) {
 
