@@ -89,6 +89,8 @@ export default class AppConfiguration {
             return null;
         }
 
+        
+
         // Create an instance using the provided parameters
         const instance = new AppConfiguration(
             params.clientID,

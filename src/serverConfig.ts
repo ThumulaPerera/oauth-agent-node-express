@@ -34,7 +34,7 @@ export const serverConfig: ServerConfiguration = {
     cookieOptions: {
         httpOnly: true,
         sameSite: true,
-        secure: useSsl,
+        secure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : false,
         path: process.env.COOKIE_BASE_PATH || '/',
     } as CookieSerializeOptions,
 
