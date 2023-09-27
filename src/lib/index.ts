@@ -20,7 +20,7 @@ import { createAuthorizationRequest, handleAuthorizationResponse } from './login
 import { validateIDtoken } from './idTokenValidator'
 import { ValidateRequestOptions } from './validateRequest'
 import { getEncryptedCookie, decryptCookie, encryptCookie } from './cookieEncrypter'
-import { getCookiesForTokenResponse, getCookiesForUnset, getSessionIdCookie, getIdTokenCookie } from './cookieBuilder'
+import { getCookiesForTokenResponse, getCookiesForUnset, getIdTokenCookie } from './cookieBuilder'
 import { getTokenEndpointResponse, refreshAccessToken } from './getToken'
 import { getClaimsFromEncryptedIdToken, getClaimsFromIdToken } from './getIDTokenClaims'
 import getRedirectUri from './redirectUri'
@@ -53,7 +53,6 @@ export {
     getTempLoginDataCookieForUnset,
     getTempLoginDataCookie,
     getCookiesForTokenResponse,
-    getSessionIdCookie,
     getIdTokenCookie,
     getATCookieName,
     getTempLoginDataCookieName,

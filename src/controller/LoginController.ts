@@ -28,7 +28,7 @@ import {
     getIdTokenCookie,
     configManager,
     tokenPersistenceManager,
-    getSessionIdCookie,
+    getTempLoginDataCookieForUnset,
     getClaimsFromIdToken,
 } from '../lib'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
@@ -78,7 +78,7 @@ class LoginController {
                 // userinfo is retrieved by the client web app. 
             }
 
-            let cookiesToSet = []
+            // let cookiesToSet = []
 
             // store the tokens in redis
             const sessionId: string = await tokenPersistenceManager.saveTokens({
@@ -87,16 +87,20 @@ class LoginController {
                 refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) // TODO: handle null cases
             })
             // add session id to cookies
-            cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))
+            // cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))
 
-            cookiesToSet.push(...getCookiesForTokenResponse(tokenResponse, config, serverConfig, true))
-            
+            // set access token and session id cookies
+            let cookies = getCookiesForTokenResponse(tokenResponse, sessionId, serverConfig)
+
+            // set userinfo cookie
             const claims = getClaimsFromIdToken(tokenResponse.id_token)
             const encodedClaims = Buffer.from(JSON.stringify(claims), 'utf8').toString('base64')
-            
-            cookiesToSet.push(getIdTokenCookie(encodedClaims, serverConfig, config))
+            cookies.push(getIdTokenCookie(encodedClaims, serverConfig, config))
 
-            res.set('Set-Cookie', cookiesToSet)
+            // unset temp login data cookie
+            cookies.push(getTempLoginDataCookieForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
+            
+            res.set('Set-Cookie', cookies)
 
             // If token response does not contain ID token, we should have returned an error response
             res.redirect(config.postLoginRedirectUrl)

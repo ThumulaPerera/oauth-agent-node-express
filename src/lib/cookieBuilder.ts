@@ -15,32 +15,23 @@
  */
 
 import {CookieSerializeOptions, serialize} from 'cookie'
-import {getEncryptedCookie} from './cookieEncrypter'
 import AppConfiguration from './appConfiguration'
 import {ServerConfiguration} from './serverConfiguration'
 import {getATCookieName, getAuthCookieName, getCSRFCookieName, getIDCookieName, getSessionIdCookieName, getPlainIdTokenCookieName} from './cookieName'
-import {getTempLoginDataCookieForUnset} from './pkce'
 
 const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
 
-function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration, serverConfig: ServerConfiguration, unsetTempLoginDataCookie: boolean = false): string[] {
+function getCookiesForTokenResponse(tokenResponse: any, sessionId: string, serverConfig: ServerConfiguration): string[] {
+
+    const cookies = []
 
     const accessTokenCookie = 
         serialize(getATCookieName(serverConfig.cookieNamePrefix), tokenResponse.access_token, serverConfig.cookieOptions)
-    
-    const cookies = [
-        accessTokenCookie
-    ]
+    const sessionIdCookie = 
+        serialize(getSessionIdCookieName(serverConfig.cookieNamePrefix), sessionId, serverConfig.cookieOptions)
 
-    if (unsetTempLoginDataCookie) {
-        cookies.push(getTempLoginDataCookieForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
-    }
-
+    cookies.push(accessTokenCookie, sessionIdCookie)
     return cookies
-}
-
-function getSessionIdCookie(sessionId: string, serverConfig: ServerConfiguration): string {
-    return serialize(getSessionIdCookieName(serverConfig.cookieNamePrefix), sessionId, serverConfig.cookieOptions)
 }
 
 function getIdTokenCookie(idToken: string, serverConfig: ServerConfiguration, config: AppConfiguration): string {
@@ -70,4 +61,4 @@ function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: s
     ]
 }
 
-export { getCookiesForTokenResponse, getCookiesForUnset, getSessionIdCookie, getIdTokenCookie };
+export { getCookiesForTokenResponse, getCookiesForUnset, getIdTokenCookie };

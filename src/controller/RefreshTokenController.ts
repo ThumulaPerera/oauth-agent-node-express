@@ -18,7 +18,7 @@ import * as express from 'express'
 import { serverConfig } from '../serverConfig'
 import {
     decryptCookie, getAuthCookieName, getCookiesForTokenResponse, refreshAccessToken, validateIDtoken, ValidateRequestOptions, configManager, getSessionIdCookieName, tokenPersistenceManager,
-    encryptCookie, getSessionIdCookie,
+    encryptCookie,
 } from '../lib'
 import { InvalidCookieException, AuthorizationClientException } from '../lib/exceptions'
 import validateExpressRequest from '../validateExpressRequest'
@@ -53,15 +53,15 @@ class RefreshTokenController {
                         validateIDtoken(config, tokenResponse.id_token)
                     }
 
-                    let cookiesToSet = []
                     await tokenPersistenceManager.saveTokensForSession({
                         idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
                         refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) // TODO: handle null cases
                     }, sessionId)
-                    // add session id to cookies
-                    cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))
-                    cookiesToSet.push(...getCookiesForTokenResponse(tokenResponse, config, serverConfig, false))
-                    res.set('Set-Cookie', cookiesToSet)
+
+                    // set access token and session id cookies
+                    const cookies = getCookiesForTokenResponse(tokenResponse, sessionId, serverConfig)
+
+                    res.set('Set-Cookie', cookies)
                     res.status(204).send()
                 } catch (e) {
                     if (e instanceof AuthorizationClientException) {
