@@ -48,7 +48,7 @@ export async function handleAuthorizationResponse(pageUrl?: string): Promise<any
         throw new MissingStateException()
     }
 
-    if (data.state && data.code) {
+    if (data.code) {
 
         return {
             code: data.code,
@@ -56,7 +56,7 @@ export async function handleAuthorizationResponse(pageUrl?: string): Promise<any
         }
     }
 
-    if (data.state && data.error) {
+    if (data.error) {
 
         throw new AuthorizationResponseException(
             data.error,
