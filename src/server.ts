@@ -17,7 +17,7 @@ import * as fs from 'fs'
 import * as https from 'https'
 import {serverConfig} from './serverConfig'
 
-import app from 'app'
+import app from './app'
 
 if (serverConfig.serverCertPath) {
 
