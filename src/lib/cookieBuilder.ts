@@ -23,7 +23,7 @@ import {getTempLoginDataCookieForUnset} from './pkce'
 
 const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
 
-function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration, serverConfig: ServerConfiguration, unsetTempLoginDataCookie: boolean = false, csrfCookieValue?: string, encryptAccessToken: boolean = true): string[] {
+function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration, serverConfig: ServerConfiguration, unsetTempLoginDataCookie: boolean = false, encryptAccessToken: boolean = true): string[] {
 
     const accessTokenCookie = encryptAccessToken ? 
         getEncryptedCookie(serverConfig.cookieOptions, tokenResponse.access_token, getATCookieName(serverConfig.cookieNamePrefix), serverConfig.encKey) 
@@ -33,10 +33,6 @@ function getCookiesForTokenResponse(tokenResponse: any, config: AppConfiguration
     const cookies = [
         accessTokenCookie
     ]
-
-    if (csrfCookieValue) {
-        cookies.push(getEncryptedCookie(serverConfig.cookieOptions, csrfCookieValue, getCSRFCookieName(serverConfig.cookieNamePrefix), serverConfig.encKey))
-    }
 
     if (unsetTempLoginDataCookie) {
         cookies.push(getTempLoginDataCookieForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))

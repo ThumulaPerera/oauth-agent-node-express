@@ -69,8 +69,6 @@ class LoginController {
 
         const data = await handleAuthorizationResponse(requestUrl)
 
-        let csrfToken: string = ''
-
         if (data.code && data.state) {
 
             const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(serverConfig.cookieNamePrefix)] : undefined
@@ -81,26 +79,6 @@ class LoginController {
                 // TODO: We should consider sending an error response if ID token is not present
                 // seems this is the right thing to do since we only consider the user as logged in when 
                 // userinfo is retrieved by the client web app. 
-            }
-
-            csrfToken = generateRandomString()
-            const csrfCookie = req.cookies[getCSRFCookieName(serverConfig.cookieNamePrefix)]
-            if (csrfCookie) {
-
-                try {
-                    // Avoid setting a new value if the user opens two browser tabs and signs in on both
-                    csrfToken = decryptCookie(serverConfig.encKey, csrfCookie)
-
-                } catch (e) {
-
-                    // If the system has been redeployed with a new cookie encryption key, decrypting old cookies from the browser will fail
-                    // In this case generate a new CSRF token so that the SPA can complete its login without errors
-                    csrfToken = generateRandomString()
-                }
-            } else {
-
-                // Generate a new value otherwise
-                csrfToken = generateRandomString()
             }
 
             let cookiesToSet = []
@@ -114,7 +92,7 @@ class LoginController {
                 cookiesToSet.push(getSessionIdCookie(sessionId, serverConfig))
             }
 
-            cookiesToSet.push(...getCookiesForTokenResponse(tokenResponse, config, serverConfig, true, csrfToken, false))
+            cookiesToSet.push(...getCookiesForTokenResponse(tokenResponse, config, serverConfig, true, false))
             
             const claims = getClaimsFromIdToken(tokenResponse.id_token)
             const encodedClaims = Buffer.from(JSON.stringify(claims), 'utf8').toString('base64')
@@ -132,6 +110,8 @@ class LoginController {
             // res.setHeader('Location', redirectLocation)
         } else {
             // TODO: handle error
+            // If IdP sends a error query param, it is handled by handleAuthorizationResponse and Error is thrown
+            // This is reached if state or code is missing and there's no error as well
         }
 
         // if (csrfToken) {
