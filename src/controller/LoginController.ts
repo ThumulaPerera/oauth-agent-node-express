@@ -72,12 +72,8 @@ class LoginController {
             const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(serverConfig.cookieNamePrefix)] : undefined
 
             const tokenResponse = await getTokenEndpointResponse(config, serverConfig, data.code, data.state, tempLoginData)
-            if (tokenResponse.id_token) {
-                validateIDtoken(config, tokenResponse.id_token)
-                // TODO: We should consider sending an error response if ID token is not present
-                // seems this is the right thing to do since we only consider the user as logged in when 
-                // userinfo is retrieved by the client web app. 
-            }
+
+            validateIDtoken(config, tokenResponse.id_token)
 
             // store the tokens in redis
             const sessionId: string = await tokenPersistenceManager.saveTokens({

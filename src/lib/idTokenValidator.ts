@@ -15,7 +15,7 @@
  */
 
 import * as jose from 'jose';
-import {InvalidIDTokenException} from './exceptions';
+import { InvalidIDTokenException } from './exceptions';
 import AppConfiguration from './appConfiguration';
 
 /*
@@ -25,19 +25,19 @@ import AppConfiguration from './appConfiguration';
  */
 export function validateIDtoken(config: AppConfiguration, idToken: string) {
 
-    // For backwards compatibility, only validate the issuer when one is configured
-    if (process.env.ISSUER) {
-    
-        const payload = jose.decodeJwt(idToken)
-        
-        if (payload.iss !== config.issuer) {
-            throw new InvalidIDTokenException(new Error('Unexpected iss claim'))
-        }
+    if (!idToken) {
+        throw new InvalidIDTokenException(new Error('No ID token found'))
+    }
 
-        const audience = getAudienceClaim(payload.aud)
-        if (audience.indexOf(config.clientID) === -1) {
-            throw new InvalidIDTokenException(new Error('Unexpected aud claim'))
-        }
+    const payload = jose.decodeJwt(idToken)
+
+    if (payload.iss !== config.issuer) {
+        throw new InvalidIDTokenException(new Error('Unexpected iss claim'))
+    }
+
+    const audience = getAudienceClaim(payload.aud)
+    if (audience.indexOf(config.clientID) === -1) {
+        throw new InvalidIDTokenException(new Error('Unexpected aud claim'))
     }
 }
 
