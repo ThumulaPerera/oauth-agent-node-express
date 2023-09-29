@@ -15,11 +15,11 @@
  */
 
 import * as express from 'express'
-import {getIDCookieName, getClaimsFromEncryptedIdToken, ValidateRequestOptions, configManager, tokenPersistenceManager, getSessionIdCookieName} from '../lib'
-import {serverConfig} from '../serverConfig'
+import { getIDCookieName, getClaimsFromEncryptedIdToken, ValidateRequestOptions, configManager, tokenPersistenceManager, getSessionIdCookieName } from '../lib'
+import { serverConfig } from '../serverConfig'
 import validateExpressRequest from '../validateExpressRequest'
-import {InvalidCookieException} from '../lib/exceptions'
-import {asyncCatch} from '../middleware/exceptionMiddleware';
+import { InvalidCookieException, InvalidSessionException } from '../lib/exceptions'
+import { asyncCatch } from '../middleware/exceptionMiddleware';
 
 
 class ClaimsController {
@@ -31,27 +31,27 @@ class ClaimsController {
 
     getClaims = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-        const config = await configManager.getConfigForRequest(req)
-
         const sessionIdCookieName = getSessionIdCookieName(serverConfig.cookieNamePrefix)
-        if (req.cookies && req.cookies[sessionIdCookieName]) {
-            const sessionId = req.cookies[sessionIdCookieName]
-            console.log('Session ID: ' + sessionId)
-            const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
-            if (savedTokens) {
-                const userData = getClaimsFromEncryptedIdToken(serverConfig.encKey, savedTokens.idToken)
-                res.status(200).json(userData)
-            } else {
-                // TODO: throw a better exception
-                const error = new InvalidCookieException()
-                error.logInfo = 'No tokens were found in redis for the session id supplied in a call to get claims'
-                throw error
-            }
-        } else {
+        const sessionId = req.cookies[sessionIdCookieName]
+
+        if (!sessionId) {
             const error = new InvalidCookieException()
             error.logInfo = 'No session ID cookie was supplied in a call to get claims'
             throw error
         }
+
+        let savedTokens
+        try {
+            savedTokens = await tokenPersistenceManager.getTokens(sessionId)
+        } catch (e) {
+            // TODO: handle other errors that maybe thrown by redis client
+            const error = new InvalidSessionException(e as Error)
+            error.logInfo = 'Could not retrieve tokens for the session id supplied in a claims call'
+            throw error
+        }
+
+        const userData = getClaimsFromEncryptedIdToken(serverConfig.encKey, savedTokens.idToken)
+        res.status(200).json(userData)
     }
 }
 

@@ -24,7 +24,7 @@ function getClaimsFromEncryptedIdToken(encKey: string, encryptedCookie: string):
         idToken = decryptCookie(encKey, encryptedCookie)
     } catch (err: any) {
         const error = new InvalidCookieException(err)
-        error.logInfo = 'Unable to decrypt the ID cookie to get claims'
+        error.logInfo = 'Unable to decrypt the ID token to get claims'
         throw error
     }
 
