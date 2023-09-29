@@ -1,14 +1,16 @@
 
-import fetch, {RequestInit, Response} from 'node-fetch';
+import fetch, { RequestInit, Response } from 'node-fetch';
 import * as setCookie from 'set-cookie-parser';
 import * as urlParse from 'url-parse';
 // import {config as serverConfig} from '../../src/config';
 // import { ClientOptions } from '../../src/lib/clientOptions';
-import {serverConfig} from '../../src/serverConfig'
+import { serverConfig } from '../../src/serverConfig'
 import { xOriginalGwUrl } from './data';
 const request = require("supertest");
 import { testAppConfig } from './data';
 import app from '../../src/app'
+import { decryptCookie } from '../../src/lib/cookieEncrypter';
+
 
 const oauthAgentBaseUrl = `http://localhost:${serverConfig.port}${serverConfig.endpointsPrefix}`
 const wiremockAdminBaseUrl = `http://localhost:8443/__admin/mappings`
@@ -23,7 +25,7 @@ export async function performLogin(stateOverride: string = ''): Promise<[number,
     const payload = {
         pageUrl: `${oauthAgentBaseUrl}?code=${code}&state=${stateOverride || state}`
     }
-    
+
     const options = {
         method: 'POST',
         headers: {
@@ -48,7 +50,7 @@ export function getCookieString(response: Response) {
 
     const rawCookies = response.headers.raw()['set-cookie']
     const cookies = setCookie.parse(rawCookies)
-    
+
     let allCookiesString = '';
     cookies.forEach((c) => {
         allCookiesString += `${c.name}=${c.value};`
@@ -92,7 +94,7 @@ export async function startLogin(requestBody: any = null): Promise<[string, stri
     const responseBody = await response.json();
     const parsedUrl = urlParse(responseBody.authorizationRequestUrl, true)
     const state = parsedUrl.query.state
-    
+
     const cookieString = getCookieString(response)
     return [state!, cookieString]
 }
@@ -123,7 +125,7 @@ async function addStub(stubbedResponse: any): Promise<void> {
  */
 async function deleteStub(id: string): Promise<void> {
 
-    const response = await fetch(`${wiremockAdminBaseUrl}/${id}`, {method: 'DELETE'})
+    const response = await fetch(`${wiremockAdminBaseUrl}/${id}`, { method: 'DELETE' })
     if (response.status !== 200) {
         const responseData = await response.text()
         console.log(responseData)
@@ -140,9 +142,33 @@ export async function sendLoginRequest(): Promise<[number, setCookie.Cookie | un
     const response = await request(app)
         .get('/auth/login')
         .set('X-Original-GW-Url', xOriginalGwUrl)
-    
+
     const cookies = parseCookieHeader(response.headers['set-cookie'])
     const tempLoginDataCookie = cookies.find((c) => c.name === 'auth_login')
 
     return [response.status, tempLoginDataCookie]
+}
+
+export async function sendLoginCallback(state: string, cookie: setCookie.Cookie): Promise<[number, setCookie.Cookie[]]> {
+
+    const response = await request(app)
+        .get(`/auth/login/callback?state=${state}&code=1234`)
+        .set('X-Original-GW-Url', xOriginalGwUrl)
+        .set('Cookie', `${cookie?.name}=${cookie?.value}`)
+
+    const cookies = parseCookieHeader(response.headers['set-cookie'])
+
+    return [response.status, cookies]
+}
+
+export async function doCompleteLogin(): Promise<[number, setCookie.Cookie]> {
+
+    const [, tempLoginDataCookie] = await sendLoginRequest()
+
+    const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, tempLoginDataCookie?.value!))
+
+    const [status, cookies] = await sendLoginCallback(parsedTempLoginData.state, tempLoginDataCookie!)
+    const sessionIdCookie = cookies.find((c) => c.name === 'auth_sessionid')
+
+    return [status, sessionIdCookie!]
 }

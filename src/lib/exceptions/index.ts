@@ -27,6 +27,7 @@ import AuthorizationServerException from './AuthorizationServerException'
 import UnhandledException from './UnhandledException'
 import MissingStateException from './MissingStateException'
 import InvalidAuthorizationResponseException from './InvalidAuthorizationResponseException'
+import InvalidSessionException from './InvalidSessionException'
 
 export {
     OAuthAgentException,
@@ -42,4 +43,5 @@ export {
     UnhandledException,
     MissingStateException,
     InvalidAuthorizationResponseException,
+    InvalidSessionException,
 }

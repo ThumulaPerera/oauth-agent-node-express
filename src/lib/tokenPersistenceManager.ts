@@ -23,6 +23,8 @@ class RedisTokenPersistenceManager implements TokenPersistenceManager {
 
     async saveTokensForSession(tokens: SavedTokens, sessionId: string): Promise<void> {
         const idTokenKey = `idtoken:${sessionId}`
+        // TODO: see if we can store both using 1 DB call
+        // TODO: see if we need a await here
         redisClient.set(idTokenKey, tokens.idToken)
 
         if (tokens.refreshToken) {

@@ -17,7 +17,7 @@
 import * as express from 'express'
 import { serverConfig } from '../serverConfig'
 import { getATCookieName, getCookiesForUnset, getLogoutURL, decryptCookie, getIDCookieName, configManager, getSessionIdCookieName, tokenPersistenceManager } from '../lib'
-import { InvalidCookieException } from '../lib/exceptions'
+import { InvalidCookieException, InvalidSessionException } from '../lib/exceptions'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
 
 class LogoutController {
@@ -32,26 +32,34 @@ class LogoutController {
 
         const config = await configManager.getConfigForRequest(req)
 
-        let idToken
-
-        if (req.cookies && req.cookies[getATCookieName(serverConfig.cookieNamePrefix)] && req.cookies[getSessionIdCookieName(serverConfig.cookieNamePrefix)]) {
-            const sessionId = req.cookies[getSessionIdCookieName(serverConfig.cookieNamePrefix)]
-            const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
-            if (savedTokens) {
-                idToken = decryptCookie(serverConfig.encKey, savedTokens.idToken)
-                // delete the tokens from redis
-                await tokenPersistenceManager.deleteTokens(sessionId)
-            } else {
-                // TODO: throw a better exception
-                const error = new InvalidCookieException()
-                error.logInfo = 'No tokens were found in redis for the session id supplied in a logout call'
-                throw error
-            }
-        } else {
+        if (!req.cookies[getSessionIdCookieName(serverConfig.cookieNamePrefix)]) {
             const error = new InvalidCookieException()
             error.logInfo = 'No session id cookie was supplied in a logout call'
             throw error
         }
+        if (!req.cookies[getATCookieName(serverConfig.cookieNamePrefix)]) {
+            // TODO: do we need this check? Is AT conceptually related to logout?
+            const error = new InvalidCookieException()
+            error.logInfo = 'No access token cookie was supplied in a logout call'
+            throw error
+        }
+
+        let idToken
+        const sessionId = req.cookies[getSessionIdCookieName(serverConfig.cookieNamePrefix)]
+        let savedTokens
+        try {
+            savedTokens = await tokenPersistenceManager.getTokens(sessionId)
+        } catch (e) {
+            // TODO: handle other errors that maybe thrown by redis client
+            // TODO: should we silently logout if we can't find the tokens?
+            const error = new InvalidSessionException(e as Error)
+            error.logInfo = 'Could not retrieve tokens for the session id supplied in a logout call'
+            throw error
+        }
+
+        idToken = decryptCookie(serverConfig.encKey, savedTokens.idToken)
+        // delete the tokens from redis
+        await tokenPersistenceManager.deleteTokens(sessionId)
 
         const logoutURL = getLogoutURL(config, idToken)
         res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix, serverConfig.endpointsPrefix))

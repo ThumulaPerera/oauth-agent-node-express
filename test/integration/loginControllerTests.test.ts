@@ -300,7 +300,6 @@ describe('LoginControllerTests', () => {
             assert.equal(response.headers.location, testAppConfig.postLoginRedirectUrl, 'Incorrect post login redirect url')
 
             const cookies = parseCookieHeader(response.headers['set-cookie'])
-            console.log(JSON.stringify(cookies, null, 2))
 
             const tempLoginDataCookie = cookies.find((c) => c.name === 'auth_login')
             assert.isTrue(tempLoginDataCookie !== undefined, 'Missing temp login data unset cookie')
@@ -326,6 +325,8 @@ describe('LoginControllerTests', () => {
             assert.isTrue(idTokenCookie?.secure, 'Missing Secure')
             assert.equal(idTokenCookie?.sameSite, 'Strict', 'Incorrect SameSite Strict')
             assert.equal(idTokenCookie?.path, testAppConfig.postLoginRedirectUrl, 'Incorrect Path')
+
+            // TODO: validate that the tokens are stored in redis
         })
     })
 })

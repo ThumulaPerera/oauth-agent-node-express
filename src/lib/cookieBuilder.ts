@@ -53,10 +53,7 @@ function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: s
     }
 
     return [
-        serialize(getAuthCookieName(cookieNamePrefix), "", { ...cookieOptions, path: endpointsPrefix + '/refresh' }),
         serialize(getATCookieName(cookieNamePrefix), "", cookieOptions),
-        serialize(getIDCookieName(cookieNamePrefix), "", cookieOptions),
-        serialize(getCSRFCookieName(cookieNamePrefix), "", cookieOptions),
         serialize(getSessionIdCookieName(cookieNamePrefix), "", cookieOptions),
     ]
 }
