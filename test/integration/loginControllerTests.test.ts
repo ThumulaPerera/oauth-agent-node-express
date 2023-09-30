@@ -48,7 +48,7 @@ describe('LoginControllerTests', () => {
 
         it('should return 500 if config existing in redis is invalid', async () => {
 
-            let invalidAppConfig = { ...testAppConfig }
+            const invalidAppConfig = { ...testAppConfig }
             // make client ID empty
             invalidAppConfig.clientID = ''
 

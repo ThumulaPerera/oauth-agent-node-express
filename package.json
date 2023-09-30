@@ -7,7 +7,9 @@
         "start": "eval $(cat .env) ts-node src/server.ts",
         "start-test-server": "eval $(cat .testenv) ts-node src/server.ts",
         "wiremock": "wiremock --root-dir test/integration --port 8443",
-        "test": "eval $(cat .testenv) jest --testTimeout=5000 --detectOpenHandles"
+        "test": "eval $(cat .testenv) jest --testTimeout=5000 --detectOpenHandles",
+        "lint": "eslint . --ext .ts",
+        "lint-and-fix": "eslint . --ext .ts --fix"
     },
     "author": "Curity AB",
     "license": "Apache-2.0",
@@ -41,7 +43,10 @@
         "@types/sinon": "^10.0.17",
         "@types/supertest": "^2.0.13",
         "@types/url-parse": "^1.4.8",
+        "@typescript-eslint/eslint-plugin": "^6.7.3",
+        "@typescript-eslint/parser": "^6.7.3",
         "chai": "^4.3.6",
+        "eslint": "^8.50.0",
         "ioredis-mock": "^8.8.3",
         "jest": "^29.7.0",
         "jest-fetch-mock": "^3.0.3",

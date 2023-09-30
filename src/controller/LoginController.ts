@@ -83,7 +83,7 @@ class LoginController {
             })
 
             // set access token and session id cookies
-            let cookies = getCookiesForTokenResponse(tokenResponse, sessionId, serverConfig)
+            const cookies = getCookiesForTokenResponse(tokenResponse, sessionId, serverConfig)
 
             // set userinfo cookie
             const claims = getClaimsFromIdToken(tokenResponse.id_token)
@@ -98,7 +98,6 @@ class LoginController {
             // If token response does not contain ID token, we should have returned an error response
             res.redirect(config.postLoginRedirectUrl)
         } else {
-            // TODO: handle error
             // If IdP sends a error query param, it is handled by handleAuthorizationResponse and Error is thrown
             // This is reached if state is present but neither code nor error is present in the query params
             throw new InvalidAuthorizationResponseException('Invalid response from IdP')

@@ -71,7 +71,7 @@ export class RequestLog {
                 }
             }
             
-            let fields: string[] = []
+            const fields: string[] = []
             this._addField(fields, this.time)
             this._addField(fields, this.method)
             this._addField(fields, this.path)
