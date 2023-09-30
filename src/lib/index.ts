@@ -26,7 +26,14 @@ import { getClaimsFromEncryptedIdToken, getClaimsFromIdToken } from './getIDToke
 import getRedirectUri from './redirectUri'
 import getLogoutURL from './getLogoutURL'
 import { getTempLoginDataCookie, getTempLoginDataCookieForUnset, generateRandomString } from './pkce'
-import { getAuthCookieName, getIDCookieName, getCSRFCookieName, getATCookieName, getTempLoginDataCookieName, getSessionIdCookieName } from './cookieName'
+import {
+    getAuthCookieName,
+    getIDCookieName,
+    getCSRFCookieName,
+    getATCookieName,
+    getTempLoginDataCookieName,
+    getSessionIdCookieName
+} from './cookieName'
 import configManager from './configManager'
 import { tokenPersistenceManager, SavedTokens } from './tokenPersistenceManager'
 

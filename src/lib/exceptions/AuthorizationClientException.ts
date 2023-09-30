@@ -26,7 +26,7 @@ export default class AuthorizationClientException extends OAuthAgentException {
     constructor(grant: Grant, status: number, responseText: string) {
         super('A request sent to the Authorization Server was rejected')
 
-        // User info requests can be caused by expiry, in which case inform the SPA so that it can avoid an error display
+        // User info requests can be caused by expiry, in which case inform the SPA so it can avoid an error display
         if (grant === Grant.UserInfo && status == 401) {
             this.code = 'token_expired'
             this.statusCode = 401

@@ -17,11 +17,17 @@
 import * as express from 'express'
 import { serverConfig } from '../serverConfig'
 import {
-    decryptCookie, getCookiesForTokenResponse, refreshAccessToken, validateIDtoken, configManager, getSessionIdCookieName, tokenPersistenceManager,
-    encryptCookie,
+    decryptCookie,
+    getCookiesForTokenResponse,
+    refreshAccessToken,
+    validateIDtoken,
+    configManager,
+    getSessionIdCookieName,
+    tokenPersistenceManager,
+    encryptCookie
 } from '../lib'
 import { InvalidCookieException, AuthorizationClientException } from '../lib/exceptions'
-import { asyncCatch } from '../middleware/exceptionMiddleware';
+import { asyncCatch } from '../middleware/exceptionMiddleware'
 
 class RefreshTokenController {
     public router = express.Router()
@@ -55,7 +61,8 @@ class RefreshTokenController {
 
                     await tokenPersistenceManager.saveTokensForSession({
                         idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
-                        refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) // TODO: handle null cases
+                        // TODO: handle refresh token null cases
+                        refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) 
                     }, sessionId)
 
                     // set access token and session id cookies

@@ -87,7 +87,8 @@ describe('RefreshTokenControllerTests', () => {
         assert.notEqual(rewrittenCookieString, cookieString)
     })
 
-    it("A configuration error rejected by the Authorization Server when refreshing tokens should result in a 400 status code", async () => {
+    it("A configuration error rejected by the Auth Server when refreshing tokens should result in a 400 status code",
+            async () => {
 
         const [, loginBody, cookieString] = await performLogin()
 
@@ -166,6 +167,7 @@ describe('RefreshTokenControllerTests', () => {
 
         // Clear cookies so that the next call to /login/end, eg a page reload, indicates not logged in
         const clearedCookies = getCookieString(response);
-        assert.equal(clearedCookies, "example-auth=;example-at=;example-id=;example-csrf=;", 'Incorrect cleared cookies string')
+        assert.equal(clearedCookies, "example-auth=;example-at=;example-id=;example-csrf=;", 
+            'Incorrect cleared cookies string')
     })
 })

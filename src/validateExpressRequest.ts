@@ -19,7 +19,8 @@ import {AppConfiguration, ServerConfiguration} from './lib'
 import {getCSRFCookieName} from './lib'
 import * as express from 'express'
 
-export default function validateExpressRequest(req: express.Request, options: ValidateRequestOptions, config: AppConfiguration, serverConfig: ServerConfiguration) {
+export default function validateExpressRequest(req: express.Request, options: ValidateRequestOptions, 
+        config: AppConfiguration, serverConfig: ServerConfiguration) {
     // TODO: check whether this function is used
     // TODO: remove config input param
 

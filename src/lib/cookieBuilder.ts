@@ -21,12 +21,14 @@ import {getATCookieName, getSessionIdCookieName, getPlainIdTokenCookieName} from
 
 const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
 
-function getCookiesForTokenResponse(tokenResponse: any, sessionId: string, serverConfig: ServerConfiguration): string[] {
+function getCookiesForTokenResponse(tokenResponse: any, sessionId: string, serverConfig: ServerConfiguration)
+        : string[] {
 
     const cookies = []
 
     const accessTokenCookie = 
-        serialize(getATCookieName(serverConfig.cookieNamePrefix), tokenResponse.access_token, serverConfig.cookieOptions)
+        serialize(getATCookieName(serverConfig.cookieNamePrefix), tokenResponse.access_token, 
+            serverConfig.cookieOptions)
     const sessionIdCookie = 
         serialize(getSessionIdCookieName(serverConfig.cookieNamePrefix), sessionId, serverConfig.cookieOptions)
 

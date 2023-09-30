@@ -54,7 +54,14 @@ class LoginController {
         tempLoginDataCookieOptions.sameSite = 'lax'
 
         res.setHeader('Set-Cookie',
-            getTempLoginDataCookie(authorizationRequestData.codeVerifier, authorizationRequestData.state, tempLoginDataCookieOptions, serverConfig.cookieNamePrefix, serverConfig.encKey))
+            getTempLoginDataCookie(
+                authorizationRequestData.codeVerifier,
+                authorizationRequestData.state,
+                tempLoginDataCookieOptions,
+                serverConfig.cookieNamePrefix,
+                serverConfig.encKey
+            )
+        )
         res.setHeader('Location', authorizationRequestData.authorizationRequestURL)
         res.status(302).send()
     }
@@ -70,10 +77,17 @@ class LoginController {
 
         if (data.code && data.state) {
 
-            const tempLoginData = req.cookies ? req.cookies[getTempLoginDataCookieName(serverConfig.cookieNamePrefix)] : undefined
+            const tempLoginData = req.cookies
+                ? req.cookies[getTempLoginDataCookieName(serverConfig.cookieNamePrefix)]
+                : undefined
 
-            const tokenResponse = await getTokenEndpointResponse(config, serverConfig, data.code, data.state, tempLoginData)
-
+            const tokenResponse = await getTokenEndpointResponse(
+                config,
+                serverConfig,
+                data.code,
+                data.state,
+                tempLoginData
+            )
             validateIDtoken(config, tokenResponse.id_token)
 
             // store the tokens in redis

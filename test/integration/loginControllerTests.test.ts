@@ -154,7 +154,7 @@ describe('LoginControllerTests', () => {
                 .set('X-Original-GW-Url', xOriginalGwUrl)
 
             const expectedErrorCode = 'invalid_request'
-            // TODO: think whether a client really knows what a code verifier is? maybe say missing temp login data cookie
+            // TODO: think whether a client really knows what code verifier is? maybe say missing temp login data cookie
             const expectedErrorMessage = 'Missing code verifier when completing a login'
 
             validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
@@ -334,13 +334,15 @@ describe('LoginControllerTests', () => {
             console.log(response.headers)
 
             assert.equal(response.status, 302, 'Incorrect HTTP status')
-            assert.equal(response.headers.location, testAppConfig.postLoginRedirectUrl, 'Incorrect post login redirect url')
+            assert.equal(response.headers.location, testAppConfig.postLoginRedirectUrl, 
+                'Incorrect post login redirect url')
 
             const cookies = parseCookieHeader(response.headers['set-cookie'])
 
             const tempLoginDataCookie = cookies.find((c) => c.name === 'auth_login')
             assert.isTrue(tempLoginDataCookie !== undefined, 'Missing temp login data unset cookie')
-            assert.isTrue(new Date(tempLoginDataCookie?.expires || "").getTime() < Date.now(), 'Temp login data cookie expiry time is incorrectly set')
+            assert.isTrue(new Date(tempLoginDataCookie?.expires || "").getTime() < Date.now(), 
+                'Temp login data cookie expiry time is incorrectly set')
 
             const accessTokenCookie = cookies.find((c) => c.name === 'auth_at')
             assert.isTrue(accessTokenCookie !== undefined, 'Missing access token cookie')

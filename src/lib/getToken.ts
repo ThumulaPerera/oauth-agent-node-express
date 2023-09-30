@@ -19,9 +19,16 @@ import {decryptCookie} from './cookieEncrypter'
 import {Grant} from './grant'
 import {ServerConfiguration} from './serverConfiguration'
 import AppConfiguration from './appConfiguration'
-import {OAuthAgentException, InvalidStateException, MissingTempLoginDataException, AuthorizationClientException, AuthorizationServerException} from './exceptions'
+import {
+    OAuthAgentException,
+    InvalidStateException,
+    MissingTempLoginDataException,
+    AuthorizationClientException,
+    AuthorizationServerException
+} from './exceptions'
 
-async function getTokenEndpointResponse(config: AppConfiguration, serverConfig: ServerConfiguration, code: string, state: string, tempLoginData: string | undefined | null, ): Promise<any> {
+async function getTokenEndpointResponse(config: AppConfiguration, serverConfig: ServerConfiguration, code: string, 
+        state: string, tempLoginData: string | undefined | null, ): Promise<any> {
     if (!tempLoginData) {
         return Promise.reject(new MissingTempLoginDataException())
     }
@@ -38,10 +45,12 @@ async function getTokenEndpointResponse(config: AppConfiguration, serverConfig: 
             {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Basic ' + Buffer.from(config.clientID+ ":" + config.clientSecret).toString('base64'),
+                    'Authorization': 'Basic ' + Buffer.from(config.clientID+ ":" 
+                        + config.clientSecret).toString('base64'),
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: 'grant_type=authorization_code&redirect_uri=' + config.redirectUri + '&code=' + code + '&code_verifier=' + parsedTempLoginData.codeVerifier
+                body: 'grant_type=authorization_code&redirect_uri=' + config.redirectUri + '&code=' + code 
+                    + '&code_verifier=' + parsedTempLoginData.codeVerifier
             })
 
         const text = await res.text()
@@ -79,7 +88,8 @@ async function refreshAccessToken(refreshToken: string, config: AppConfiguration
             {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Basic ' + Buffer.from(config.clientID + ":" + config.clientSecret).toString('base64'),
+                    'Authorization': 'Basic ' + Buffer.from(config.clientID + ":" 
+                        + config.clientSecret).toString('base64'),
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body: 'grant_type=refresh_token&refresh_token='+refreshToken

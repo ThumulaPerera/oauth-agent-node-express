@@ -16,7 +16,15 @@
 
 import * as express from 'express'
 import { serverConfig } from '../serverConfig'
-import { getATCookieName, getCookiesForUnset, getLogoutURL, decryptCookie, configManager, getSessionIdCookieName, tokenPersistenceManager } from '../lib'
+import {
+    getATCookieName,
+    getCookiesForUnset,
+    getLogoutURL,
+    decryptCookie,
+    configManager,
+    getSessionIdCookieName,
+    tokenPersistenceManager
+} from '../lib'
 import { InvalidCookieException, InvalidSessionException } from '../lib/exceptions'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
 
