@@ -17,7 +17,7 @@
 import {CookieSerializeOptions, serialize} from 'cookie'
 import AppConfiguration from './appConfiguration'
 import {ServerConfiguration} from './serverConfiguration'
-import {getATCookieName, getAuthCookieName, getCSRFCookieName, getIDCookieName, getSessionIdCookieName, getPlainIdTokenCookieName} from './cookieName'
+import {getATCookieName, getSessionIdCookieName, getPlainIdTokenCookieName} from './cookieName'
 
 const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
 
@@ -45,7 +45,7 @@ function getIdTokenCookie(idToken: string, serverConfig: ServerConfiguration, co
     return serialize(getPlainIdTokenCookieName(), idToken, idTokenCookieOptions)
 }
 
-function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: string, endpointsPrefix: string): string[] {
+function getCookiesForUnset(options: CookieSerializeOptions, cookieNamePrefix: string): string[] {
 
     const cookieOptions = {
         ...options,

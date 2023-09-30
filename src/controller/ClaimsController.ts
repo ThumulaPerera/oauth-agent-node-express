@@ -15,9 +15,8 @@
  */
 
 import * as express from 'express'
-import { getIDCookieName, getClaimsFromEncryptedIdToken, ValidateRequestOptions, configManager, tokenPersistenceManager, getSessionIdCookieName } from '../lib'
+import { getClaimsFromEncryptedIdToken, tokenPersistenceManager, getSessionIdCookieName } from '../lib'
 import { serverConfig } from '../serverConfig'
-import validateExpressRequest from '../validateExpressRequest'
 import { InvalidCookieException, InvalidSessionException } from '../lib/exceptions'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
 
@@ -29,6 +28,7 @@ class ClaimsController {
         this.router.get('/', asyncCatch(this.getClaims))
     }
 
+    /* eslint-disable  @typescript-eslint/no-unused-vars */
     getClaims = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
         const sessionIdCookieName = getSessionIdCookieName(serverConfig.cookieNamePrefix)

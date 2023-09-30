@@ -59,6 +59,7 @@ class LoginController {
         res.status(302).send()
     }
 
+    /* eslint-disable  @typescript-eslint/no-unused-vars */
     handleCallback = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
         const config = await configManager.getConfigForRequest(req)

@@ -16,7 +16,7 @@
 
 import * as express from 'express'
 import { serverConfig } from '../serverConfig'
-import { getATCookieName, getCookiesForUnset, getLogoutURL, decryptCookie, getIDCookieName, configManager, getSessionIdCookieName, tokenPersistenceManager } from '../lib'
+import { getATCookieName, getCookiesForUnset, getLogoutURL, decryptCookie, configManager, getSessionIdCookieName, tokenPersistenceManager } from '../lib'
 import { InvalidCookieException, InvalidSessionException } from '../lib/exceptions'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
 
@@ -28,6 +28,7 @@ class LogoutController {
         this.router.get('/callback', asyncCatch(this.handlePostLogout))
     }
 
+    /* eslint-disable  @typescript-eslint/no-unused-vars */
     startLogoutUser = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
         const config = await configManager.getConfigForRequest(req)
@@ -44,7 +45,6 @@ class LogoutController {
             throw error
         }
 
-        let idToken
         const sessionId = req.cookies[getSessionIdCookieName(serverConfig.cookieNamePrefix)]
         let savedTokens
         try {
@@ -57,16 +57,17 @@ class LogoutController {
             throw error
         }
 
-        idToken = decryptCookie(serverConfig.encKey, savedTokens.idToken)
+        const idToken = decryptCookie(serverConfig.encKey, savedTokens.idToken)
         // delete the tokens from redis
         await tokenPersistenceManager.deleteTokens(sessionId)
 
         const logoutURL = getLogoutURL(config, idToken)
-        res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix, serverConfig.endpointsPrefix))
+        res.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
         res.setHeader('Location', logoutURL)
         res.status(302).send()
     }
 
+    /* eslint-disable  @typescript-eslint/no-unused-vars */
     handlePostLogout = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
         const config = await configManager.getConfigForRequest(req)

@@ -17,11 +17,10 @@
 import * as express from 'express'
 import { serverConfig } from '../serverConfig'
 import {
-    decryptCookie, getAuthCookieName, getCookiesForTokenResponse, refreshAccessToken, validateIDtoken, ValidateRequestOptions, configManager, getSessionIdCookieName, tokenPersistenceManager,
+    decryptCookie, getCookiesForTokenResponse, refreshAccessToken, validateIDtoken, configManager, getSessionIdCookieName, tokenPersistenceManager,
     encryptCookie,
 } from '../lib'
 import { InvalidCookieException, AuthorizationClientException } from '../lib/exceptions'
-import validateExpressRequest from '../validateExpressRequest'
 import { asyncCatch } from '../middleware/exceptionMiddleware';
 
 class RefreshTokenController {
@@ -31,6 +30,7 @@ class RefreshTokenController {
         this.router.post('/', asyncCatch(this.RefreshTokenFromCookie))
     }
 
+    /* eslint-disable  @typescript-eslint/no-unused-vars */
     RefreshTokenFromCookie = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
         const config = await configManager.getConfigForRequest(req)

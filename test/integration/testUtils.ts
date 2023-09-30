@@ -1,12 +1,9 @@
-
 import fetch, { RequestInit, Response } from 'node-fetch';
 import * as setCookie from 'set-cookie-parser';
 import * as urlParse from 'url-parse';
-// import {config as serverConfig} from '../../src/config';
-// import { ClientOptions } from '../../src/lib/clientOptions';
 import { serverConfig } from '../../src/serverConfig'
 import { xOriginalGwUrl } from './data';
-const request = require("supertest");
+import request = require("supertest");
 import { testAppConfig } from './data';
 import app from '../../src/app'
 import { decryptCookie } from '../../src/lib/cookieEncrypter';
@@ -166,6 +163,7 @@ export async function doCompleteLogin(): Promise<[number, setCookie.Cookie]> {
 
     const [, tempLoginDataCookie] = await sendLoginRequest()
 
+    /* eslint-disable  @typescript-eslint/no-non-null-asserted-optional-chain */
     const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, tempLoginDataCookie?.value!))
 
     const [status, cookies] = await sendLoginCallback(parsedTempLoginData.state, tempLoginDataCookie!)

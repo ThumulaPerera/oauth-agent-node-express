@@ -17,7 +17,7 @@
 import {decryptCookie} from './cookieEncrypter'
 import {InvalidCookieException, InvalidIDTokenException} from './exceptions'
 
-function getClaimsFromEncryptedIdToken(encKey: string, encryptedCookie: string): Object {
+function getClaimsFromEncryptedIdToken(encKey: string, encryptedCookie: string): any {
 
     let idToken = null
     try {
@@ -31,7 +31,7 @@ function getClaimsFromEncryptedIdToken(encKey: string, encryptedCookie: string):
     return getClaimsFromIdToken(idToken)
 }
 
-function getClaimsFromIdToken(idToken: string): Object {
+function getClaimsFromIdToken(idToken: string): any {
     const tokenParts = idToken.split('.')
     if (tokenParts.length !== 3) {
         throw new InvalidIDTokenException()

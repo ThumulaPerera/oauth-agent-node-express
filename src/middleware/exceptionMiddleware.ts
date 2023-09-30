@@ -21,7 +21,6 @@ import { OAuthAgentException } from '../lib/exceptions'
 import { UnhandledException, InvalidConfigException } from '../lib/exceptions'
 import { RequestLog } from './requestLog';
 import { configManager } from '../lib'
-import e = require('express');
 
 const redirectBasedEndpointPrefixes = ['/auth/login', '/auth/logout']
 
@@ -29,6 +28,7 @@ export default async function exceptionMiddleware(
     caught: any,
     request: Request,
     response: Response,
+    /* eslint-disable  @typescript-eslint/no-unused-vars */
     next: NextFunction): Promise<void> {
 
     const exception = caught instanceof OAuthAgentException ? caught : new UnhandledException(caught)
@@ -49,7 +49,7 @@ export default async function exceptionMiddleware(
 
     // Send the error response to the client and remove cookies when the session expires
     if (exception.code === 'session_expired') {
-        response.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix, serverConfig.endpointsPrefix))
+        response.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
     }
 
     if (isRedirectEndpoint(request.originalUrl)) {

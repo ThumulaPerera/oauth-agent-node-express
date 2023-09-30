@@ -4,7 +4,7 @@ fetchMock.enableMocks()
 fetchMock.dontMock()
 // above 3 lines should come before any other imports
 import { assert } from 'chai'
-const request = require("supertest");
+import request = require("supertest");
 import app from '../../src/app'
 import {
     testAppConfig,
@@ -156,6 +156,7 @@ describe('LogoutControllerTests', () => {
                 const cookie = cookies.find((c) => c.name === cookieName)
                 assert.isTrue(cookie !== undefined, `Missing ${cookieName} cookie`)
                 assert.equal(cookie?.value, '', `Incorrect value for cookie ${cookieName}`)
+                /* eslint-disable  @typescript-eslint/no-non-null-asserted-optional-chain */
                 assert.isTrue(new Date(cookie?.expires!).getTime() < Date.now(), `${cookieName} cookie expiry time is incorrectly set`)
             })
 

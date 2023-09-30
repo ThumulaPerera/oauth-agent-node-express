@@ -8,5 +8,9 @@
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended"
-    ]
+    ],
+    "rules": {
+        // TODO: this rule needs to be enabled
+        "@typescript-eslint/no-explicit-any": "off"
+    }
 }

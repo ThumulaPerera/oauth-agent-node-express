@@ -4,7 +4,7 @@ fetchMock.enableMocks()
 fetchMock.dontMock()
 // above 3 lines should come before any other imports
 import { assert } from 'chai'
-const request = require("supertest");
+import request = require("supertest");
 import { serverConfig } from '../../src/serverConfig'
 import {
     parseCookieHeader,
@@ -186,6 +186,7 @@ describe('LoginControllerTests', () => {
 
             const [, cookie] = await sendLoginRequest()
 
+            /* eslint-disable  @typescript-eslint/no-non-null-asserted-optional-chain */
             const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value!))
 
             const response = await request(app)
@@ -206,6 +207,7 @@ describe('LoginControllerTests', () => {
 
             const [, cookie] = await sendLoginRequest()
 
+            /* eslint-disable  @typescript-eslint/no-non-null-asserted-optional-chain */
             const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value!))
 
             const response = await request(app)
@@ -227,8 +229,9 @@ describe('LoginControllerTests', () => {
 
             await redisClient.hmset('proxy-config#uuid1', testAppConfig)
 
-            const [status, cookie] = await sendLoginRequest()
+            const [, cookie] = await sendLoginRequest()
 
+            /* eslint-disable  @typescript-eslint/no-non-null-asserted-optional-chain */
             const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value!))
 
             const response = await request(app)
@@ -256,7 +259,7 @@ describe('LoginControllerTests', () => {
 
             await redisClient.hmset('proxy-config#uuid1', customConfig)
 
-            const [status, cookie] = await sendLoginRequest()
+            const [, cookie] = await sendLoginRequest()
 
             const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value || ''))
 
@@ -288,6 +291,7 @@ describe('LoginControllerTests', () => {
 
             const [, cookie] = await sendLoginRequest()
 
+            /* eslint-disable  @typescript-eslint/no-non-null-asserted-optional-chain */
             const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value!))
 
             const response = await request(app)
@@ -318,7 +322,7 @@ describe('LoginControllerTests', () => {
 
             await redisClient.hmset('proxy-config#uuid1', customConfig)
 
-            const [status, cookie] = await sendLoginRequest()
+            const [, cookie] = await sendLoginRequest()
 
             const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value || ''))
 

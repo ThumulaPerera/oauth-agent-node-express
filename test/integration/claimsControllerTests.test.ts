@@ -3,7 +3,7 @@ import fetchMock from "jest-fetch-mock"
 fetchMock.enableMocks()
 fetchMock.dontMock()
 // above 3 lines should come before any other imports
-const request = require("supertest");
+import request = require("supertest");
 import app from '../../src/app'
 import {
     testAppConfig,
