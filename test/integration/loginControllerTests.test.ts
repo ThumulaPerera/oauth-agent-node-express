@@ -9,6 +9,7 @@ import { serverConfig } from '../../src/serverConfig'
 import {
     parseCookieHeader,
     sendLoginRequest,
+    validateRedirectToErrorPage,
 }
     from './testUtils'
 import app from '../../src/app'
@@ -26,12 +27,11 @@ describe('LoginControllerTests', () => {
 
         // TODO: move the config related cases (which are applicable to all endpoints) to a separate file
         it('should return 500 if X-Original-GW-Url header is not specified', async () => {
-
-            // TODO: change to verify redirection to error page after implementation. do the same for all error cases
-
             const response = await request(app).get('/auth/login')
 
             assert.equal(response.status, 500, 'Incorrect HTTP status')
+            assert.equal(response.body.code, 'server_error', 'Incorrect error code')
+            assert.equal(response.body.message, 'Invalid or missing client configuration', 'Incorrect error message')
         })
 
         it('should return 500 if no corresponding config exists in redis', async () => {
@@ -41,6 +41,8 @@ describe('LoginControllerTests', () => {
                 .set('X-Original-GW-Url', xOriginalGwUrl)
 
             assert.equal(response.status, 500, 'Incorrect HTTP status')
+            assert.equal(response.body.code, 'server_error', 'Incorrect error code')
+            assert.equal(response.body.message, 'Invalid or missing client configuration', 'Incorrect error message')
 
         })
 
@@ -57,7 +59,10 @@ describe('LoginControllerTests', () => {
                 .get('/auth/login')
                 .set('X-Original-GW-Url', xOriginalGwUrl)
 
+
             assert.equal(response.status, 500, 'Incorrect HTTP status')
+            assert.equal(response.body.code, 'server_error', 'Incorrect error code')
+            assert.equal(response.body.message, 'Invalid or missing client configuration', 'Incorrect error message')
         })
 
         it('should return 302 redirecting to authorize endpoint for valid login request', async () => {
@@ -94,7 +99,7 @@ describe('LoginControllerTests', () => {
     })
 
     describe('/login/callback endpoint tests', () => {
-        it('should return 400 if state is not present', async () => {
+        it('should return 302 to error page if state is not present', async () => {
 
             await redisClient.hmset('proxy-config#uuid1', testAppConfig)
 
@@ -102,10 +107,14 @@ describe('LoginControllerTests', () => {
                 .get('/auth/login/callback?code=1234')
                 .set('X-Original-GW-Url', xOriginalGwUrl)
 
-            assert.equal(response.status, 400, 'Incorrect HTTP status')
+            // TODO: maybe this should also be invalid_authorization_response    
+            const expectedErrorCode = 'invalid_request'
+            const expectedErrorMessage = 'State parameter missing in the callback from IdP'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 400 if state is present but neither code nor error is present', async () => {
+        it('should return 302 to error page if state is present but neither code nor error is present', async () => {
 
             await redisClient.hmset('proxy-config#uuid1', testAppConfig)
 
@@ -113,10 +122,13 @@ describe('LoginControllerTests', () => {
                 .get('/auth/login/callback?state=1234')
                 .set('X-Original-GW-Url', xOriginalGwUrl)
 
-            assert.equal(response.status, 400, 'Incorrect HTTP status')
+            const expectedErrorCode = 'invalid_authorization_response'
+            const expectedErrorMessage = 'Invalid response from IdP'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 400 if error is present', async () => {
+        it('should return 302 to error page if error is present', async () => {
 
             const error = 'invalid_callback'
 
@@ -126,11 +138,14 @@ describe('LoginControllerTests', () => {
                 .get(`/auth/login/callback?state=1234&error=${error}`)
                 .set('X-Original-GW-Url', xOriginalGwUrl)
 
-            assert.equal(response.status, 400, 'Incorrect HTTP status')
-            assert.equal(response.body.code, error, 'Incorrect error code')
+            // TODO: instead of relaying the IdP error, maybe we should return a generic error    
+            const expectedErrorCode = error
+            const expectedErrorMessage = 'Login failed at the Authorization Server'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 400 if temp login data cookie is not present', async () => {
+        it('should return 302 to error page if temp login data cookie is not present', async () => {
 
             await redisClient.hmset('proxy-config#uuid1', testAppConfig)
 
@@ -138,64 +153,73 @@ describe('LoginControllerTests', () => {
                 .get(`/auth/login/callback?state=1234&code=1234`)
                 .set('X-Original-GW-Url', xOriginalGwUrl)
 
-            assert.equal(response.status, 400, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'invalid_request', 'Incorrect error code')
+            const expectedErrorCode = 'invalid_request'
+            // TODO: think whether a client really knows what a code verifier is? maybe say missing temp login data cookie
+            const expectedErrorMessage = 'Missing code verifier when completing a login'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 400 if state parameter is not matching', async () => {
+        it('should return 302 to error page if state parameter is not matching', async () => {
 
             await redisClient.hmset('proxy-config#uuid1', testAppConfig)
 
-            const [status, cookie] = await sendLoginRequest()
+            const [, cookie] = await sendLoginRequest()
 
             const response = await request(app)
                 .get(`/auth/login/callback?state=1234&code=1234`)
                 .set('X-Original-GW-Url', xOriginalGwUrl)
                 .set('Cookie', `${cookie?.name}=${cookie?.value}`)
 
-            assert.equal(response.status, 400, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'invalid_request', 'Incorrect error code')
+            const expectedErrorCode = 'invalid_request'
+            const expectedErrorMessage = 'State parameter mismatch when completing a login'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 502 if 5XX response is recieved for the token call', async () => {
+        it('should return 302 to error page if 5XX response is recieved for the token call', async () => {
 
             const customConfig = { ...testAppConfig }
             customConfig.tokenEndpoint = 'http://localhost:1234'
 
             await redisClient.hmset('proxy-config#uuid1', customConfig)
 
-            const [status, cookie] = await sendLoginRequest()
+            const [, cookie] = await sendLoginRequest()
 
-            const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value || ''))
+            const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value!))
 
             const response = await request(app)
                 .get(`/auth/login/callback?state=${parsedTempLoginData.state}&code=1234`)
                 .set('X-Original-GW-Url', xOriginalGwUrl)
                 .set('Cookie', `${cookie?.name}=${cookie?.value}`)
 
-            assert.equal(response.status, 502, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'authorization_server_error', 'Incorrect error code')
+            const expectedErrorCode = 'authorization_server_error'
+            const expectedErrorMessage = 'A problem occurred with a request to the Authorization Server'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 400 if 4XX response is recieved for the token call', async () => {
+        it('should return 302 to error page if 4XX response is recieved for the token call', async () => {
 
             // Asgardeo token endpoint and an incorrect client id has been set in testAppConfig 
             await redisClient.hmset('proxy-config#uuid1', testAppConfig)
 
-            const [status, cookie] = await sendLoginRequest()
+            const [, cookie] = await sendLoginRequest()
 
-            const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value || ''))
+            const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value!))
 
             const response = await request(app)
                 .get(`/auth/login/callback?state=${parsedTempLoginData.state}&code=1234`)
                 .set('X-Original-GW-Url', xOriginalGwUrl)
                 .set('Cookie', `${cookie?.name}=${cookie?.value}`)
 
-            assert.equal(response.status, 400, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'authorization_error', 'Incorrect error code')
+            const expectedErrorCode = 'authorization_error'
+            const expectedErrorMessage = 'A request sent to the Authorization Server was rejected'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 400 if id token is missing in token response', async () => {
+        it('should return 302 to error page if id token is missing in token response', async () => {
 
             const tokenResponse = await generateTokenResponse("", "")
             tokenResponse.id_token = undefined
@@ -205,18 +229,21 @@ describe('LoginControllerTests', () => {
 
             const [status, cookie] = await sendLoginRequest()
 
-            const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value || ''))
+            const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value!))
 
             const response = await request(app)
                 .get(`/auth/login/callback?state=${parsedTempLoginData.state}&code=1234`)
                 .set('X-Original-GW-Url', xOriginalGwUrl)
                 .set('Cookie', `${cookie?.name}=${cookie?.value}`)
 
-            assert.equal(response.status, 400, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'invalid_request', 'Incorrect error code')
+            // TODO: this must be invalid_authorization_response
+            const expectedErrorCode = 'invalid_request'
+            const expectedErrorMessage = 'ID Token missing or invalid'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 400 if issuer in config and id token mismatch', async () => {
+        it('should return 302 to error page if issuer in config and id token mismatch', async () => {
             // mismatching issuers in config and token response
             const issuerInConfig = 'https://api.asgardeo.io/t/teeorg/oauth2/token'
             const issuerInTokenResponse = 'https://api.asgardeo.io/t/teeorg1/oauth2/token'
@@ -238,11 +265,14 @@ describe('LoginControllerTests', () => {
                 .set('X-Original-GW-Url', xOriginalGwUrl)
                 .set('Cookie', `${cookie?.name}=${cookie?.value}`)
 
-            assert.equal(response.status, 400, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'invalid_request', 'Incorrect error code')
+            // TODO: this must be invalid_authorization_response
+            const expectedErrorCode = 'invalid_request'
+            const expectedErrorMessage = 'ID Token missing or invalid'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 400 if client ID is not in token audience', async () => {
+        it('should return 302 to error page if client ID is not in token audience', async () => {
             const issuer = 'https://api.asgardeo.io/t/teeorg/oauth2/token'
             const clientId = 'BY2IELOes1tdD8isvfhXhEcHpGUa'
             const audience = ["asdasadasd", "asdasdasdassada"]
@@ -256,17 +286,20 @@ describe('LoginControllerTests', () => {
 
             await redisClient.hmset('proxy-config#uuid1', customConfig)
 
-            const [status, cookie] = await sendLoginRequest()
+            const [, cookie] = await sendLoginRequest()
 
-            const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value || ''))
+            const parsedTempLoginData = JSON.parse(decryptCookie(serverConfig.encKey, cookie?.value!))
 
             const response = await request(app)
                 .get(`/auth/login/callback?state=${parsedTempLoginData.state}&code=1234`)
                 .set('X-Original-GW-Url', xOriginalGwUrl)
                 .set('Cookie', `${cookie?.name}=${cookie?.value}`)
 
-            assert.equal(response.status, 400, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'invalid_request', 'Incorrect error code')
+            // TODO: this must be invalid_authorization_response
+            const expectedErrorCode = 'invalid_request'
+            const expectedErrorMessage = 'ID Token missing or invalid'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
         // TODO: add tests for token storage errors in redis

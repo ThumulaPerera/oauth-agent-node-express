@@ -10,6 +10,7 @@ const request = require("supertest");
 import { testAppConfig } from './data';
 import app from '../../src/app'
 import { decryptCookie } from '../../src/lib/cookieEncrypter';
+import { assert } from 'chai'
 
 
 const oauthAgentBaseUrl = `http://localhost:${serverConfig.port}${serverConfig.endpointsPrefix}`
@@ -171,4 +172,12 @@ export async function doCompleteLogin(): Promise<[number, setCookie.Cookie]> {
     const sessionIdCookie = cookies.find((c) => c.name === 'auth_sessionid')
 
     return [status, sessionIdCookie!]
+}
+
+export function validateRedirectToErrorPage(response: any, expectedErrorCode: string, expectedErrorMessage: string) {
+    assert.equal(response.status, 302, 'Incorrect HTTP status')
+    const location = new URL(response.headers.location, "http://localhost")
+    assert.equal(location.pathname, testAppConfig.postErrorRedirectUrl, 'Incorrect post error redirect url')
+    assert.equal(location.searchParams.get('code'), expectedErrorCode, 'Incorrect error code')
+    assert.equal(location.searchParams.get('message'), expectedErrorMessage, 'Incorrect error message')
 }

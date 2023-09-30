@@ -2,18 +2,25 @@ import * as express from 'express'
 import AppConfiguration from './appConfiguration';
 import { hgetallWithRetry } from './redisClient';
 import { getRedisKey } from './getRedisKey';
+import { InvalidConfigException } from './exceptions';
 
 class ConfigManager {
     async getConfigForRequest(req: express.Request): Promise<AppConfiguration> {
-        return this.getConfig(getRedisKey(req));
+        try {
+            const key = getRedisKey(req)
+            return await this.getConfig(key);
+        } catch (e) {
+            const error = new InvalidConfigException(e as Error)
+            error.logInfo = 'Could not retrieve config for the request'
+            throw error
+        }
+        
     }
 
-    async getConfig(key:string): Promise<AppConfiguration> {
+    private async getConfig(key:string): Promise<AppConfiguration> {
         const result = await hgetallWithRetry(key);
         const config = AppConfiguration.create(result)
         if (!config) {
-            // TODO: currently this sends 500. Try to handle more gracefully
-            // maybe redirect to error page?
             throw new Error(`No config found for key ${key}`)
         }
         return config

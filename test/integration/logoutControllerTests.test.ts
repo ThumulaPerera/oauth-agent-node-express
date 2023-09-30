@@ -15,23 +15,26 @@ import { redisClient } from '../../src/lib/redisClient';
 import {
     doCompleteLogin,
     parseCookieHeader,
+    validateRedirectToErrorPage,
 } from './testUtils'
 
 // Tests to focus on the logout endpoint
 describe('LogoutControllerTests', () => {
     describe('/logout endpoint tests', () => {
-        it('should return 401 if session id cookie does not exist', async () => {
+        it('should return 302 to error page if session id cookie does not exist', async () => {
             await redisClient.hmset('proxy-config#uuid1', testAppConfig)
 
             const response = await request(app)
                 .get('/auth/logout')
                 .set('X-Original-GW-Url', xOriginalGwUrl)
 
-            assert.equal(response.status, 401, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'unauthorized_request', 'Incorrect error code')
+            const expectedErrorCode = 'unauthorized_request'
+            const expectedErrorMessage = 'Access denied due to invalid request details'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 401 if access token cookie does not exist', async () => {
+        it('should return 302 to error page if access token cookie does not exist', async () => {
             await redisClient.hmset('proxy-config#uuid1', testAppConfig)
 
             const response = await request(app)
@@ -39,11 +42,13 @@ describe('LogoutControllerTests', () => {
                 .set('X-Original-GW-Url', xOriginalGwUrl)
                 .set('Cookie', 'auth_sessionid=abcd')
 
-            assert.equal(response.status, 401, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'unauthorized_request', 'Incorrect error code')
+            const expectedErrorCode = 'unauthorized_request'
+            const expectedErrorMessage = 'Access denied due to invalid request details'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
-        it('should return 401 if ID token is not found in redis for the session id', async () => {
+        it('should return 302 to error page if ID token is not found in redis for the session id', async () => {
             const issuer = 'https://api.asgardeo.io/t/teeorg/oauth2/token'
             const clientId = 'BY2IELOes1tdD8isvfhXhEcHpGUa'
             const audience = [`${clientId}`]
@@ -67,8 +72,10 @@ describe('LogoutControllerTests', () => {
                 .set('X-Original-GW-Url', xOriginalGwUrl)
                 .set('Cookie', `auth_sessionid=${sessionIdCookie.value};auth_at=abcd`)
 
-            assert.equal(response.status, 401, 'Incorrect HTTP status')
-            assert.equal(response.body.code, 'unauthorized_request', 'Incorrect error code')
+            const expectedErrorCode = 'unauthorized_request'
+            const expectedErrorMessage = 'Access denied due to invalid request details'
+
+            validateRedirectToErrorPage(response, expectedErrorCode, expectedErrorMessage)
         })
 
         it('should logout and return 302 to oidc logout even if refresh token is not found in redis for the session id', async () => {

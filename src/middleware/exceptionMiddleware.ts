@@ -14,23 +14,27 @@
  *  limitations under the License.
  */
 
-import {NextFunction, Request, Response} from 'express';
-import {serverConfig} from '../serverConfig';
-import {getCookiesForUnset } from'../lib';
-import {OAuthAgentException} from '../lib/exceptions'
-import {UnhandledException} from '../lib/exceptions'
-import {RequestLog} from './requestLog';
+import { NextFunction, Request, Response } from 'express';
+import { serverConfig } from '../serverConfig';
+import { getCookiesForUnset } from '../lib';
+import { OAuthAgentException } from '../lib/exceptions'
+import { UnhandledException, InvalidConfigException } from '../lib/exceptions'
+import { RequestLog } from './requestLog';
+import { configManager } from '../lib'
+import e = require('express');
 
-export default function exceptionMiddleware(
+const redirectBasedEndpointPrefixes = ['/auth/login', '/auth/logout']
+
+export default async function exceptionMiddleware(
     caught: any,
     request: Request,
     response: Response,
-    next: NextFunction): void {
+    next: NextFunction): Promise<void> {
 
     const exception = caught instanceof OAuthAgentException ? caught : new UnhandledException(caught)
-    
+
     if (!response.locals.log) {
-        
+
         // For malformed JSON errors, middleware does not get created so write the whole log here
         response.locals.log = new RequestLog()
         response.locals.log.start(request)
@@ -42,16 +46,37 @@ export default function exceptionMiddleware(
         // Otherwise just include error details in logs
         response.locals.log.addError(exception)
     }
-    
-    const statusCode = exception.statusCode
-    const data = { code: exception.code, message: exception.message}
-    
+
     // Send the error response to the client and remove cookies when the session expires
-    response.status(statusCode)
-    if (data.code === 'session_expired') {
+    if (exception.code === 'session_expired') {
         response.setHeader('Set-Cookie', getCookiesForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix, serverConfig.endpointsPrefix))
     }
-    response.send(data)
+
+    if (isRedirectEndpoint(request.originalUrl)) {
+        // If the error is thrown in a redirect endpoint, redirect to the error page
+
+        if (exception instanceof InvalidConfigException) {
+            // if we cannot retreive the config, we do not know the error page. Hence return 500
+            const payload = { code: exception.code, message: exception.message }
+            response.status(caught.statusCode).send(payload)
+            return
+        }
+
+        // TODO: optimize. Config is fetched here as well as in the controller    
+        const config = await configManager.getConfigForRequest(request)
+
+        const errorRedirectUrl = appendQueryParams(config.postErrorRedirectUrl, {
+            code: exception.code,
+            message: exception.message,
+        });
+    
+        response.redirect(errorRedirectUrl)
+        return
+    } 
+        
+    // Otherwise return the error as JSON
+    const data = { code: exception.code, message: exception.message }
+    response.status(exception.statusCode).send(data)
 }
 
 /*
@@ -69,3 +94,17 @@ export function asyncCatch(fn: any): any {
             })
     };
 }
+
+function appendQueryParams(url: string, params: Record<string, string>): string {
+    const urlObj = new URL(url, 'http://localhost');
+    const searchParams = urlObj.searchParams;
+    for (const [key, value] of Object.entries(params)) {
+        searchParams.set(key, value);
+    }
+    return `${urlObj.pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}${urlObj.hash}`;
+}
+
+function isRedirectEndpoint(url: string): boolean {
+    return redirectBasedEndpointPrefixes.some((prefix) => url.startsWith(prefix))
+}
+

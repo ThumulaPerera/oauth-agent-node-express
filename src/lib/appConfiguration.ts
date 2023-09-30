@@ -89,8 +89,6 @@ export default class AppConfiguration {
             return null;
         }
 
-        
-
         // Create an instance using the provided parameters
         const instance = new AppConfiguration(
             params.clientID,
@@ -113,7 +111,6 @@ export default class AppConfiguration {
     private static isValidParams(params: { [key: string]: string }): boolean {
         for (const param of this.requiredParams) {
             if (!params[param]) {
-                console.error(`Missing required parameter: ${param}`);
                 return false;
             }
         }
