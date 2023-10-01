@@ -15,9 +15,9 @@
  */
 
 import * as crypto from 'crypto'
-import {CookieSerializeOptions, serialize} from 'cookie'
-import {getTempLoginDataCookieName} from './cookieName'
-import {encryptCookie} from './cookieEncrypter'
+import { CookieSerializeOptions, serialize } from 'cookie'
+import { getTempLoginDataCookieName } from './cookieName'
+import { encryptCookie } from './cookieEncrypter'
 
 const VALID_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
@@ -44,10 +44,10 @@ function base64UrlEncode(hashedData: string): string {
         .replace(/\//g, '_')
 }
 
-function getTempLoginDataCookie(codeVerifier: string, state: string, options: CookieSerializeOptions, 
-        cookieNamePrefix: string, encKey: string): string {
-            
-    return serialize(getTempLoginDataCookieName(cookieNamePrefix), 
+function getTempLoginDataCookie(codeVerifier: string, state: string, options: CookieSerializeOptions,
+    cookieNamePrefix: string, encKey: string): string {
+
+    return serialize(getTempLoginDataCookieName(cookieNamePrefix),
         encryptCookie(encKey, JSON.stringify({ codeVerifier, state })), options)
 }
 
@@ -60,4 +60,4 @@ function getTempLoginDataCookieForUnset(options: CookieSerializeOptions, cookieN
     return serialize(getTempLoginDataCookieName(cookieNamePrefix), "", cookieOptions)
 }
 
-export {generateHash, generateRandomString, getTempLoginDataCookie, getTempLoginDataCookieForUnset}
+export { generateHash, generateRandomString, getTempLoginDataCookie, getTempLoginDataCookieForUnset }

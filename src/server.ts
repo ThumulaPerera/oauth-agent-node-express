@@ -15,7 +15,7 @@
  */
 import * as fs from 'fs'
 import * as https from 'https'
-import {serverConfig} from './serverConfig'
+import { serverConfig } from './serverConfig'
 
 import app from './app'
 

@@ -15,7 +15,7 @@
  */
 
 import * as express from 'express'
-import {serverConfig} from '../serverConfig'
+import { serverConfig } from '../serverConfig'
 import {
     createAuthorizationRequest,
     handleAuthorizationResponse,
@@ -107,7 +107,7 @@ class LoginController {
 
             // unset temp login data cookie
             cookies.push(getTempLoginDataCookieForUnset(serverConfig.cookieOptions, serverConfig.cookieNamePrefix))
-            
+
             res.set('Set-Cookie', cookies)
 
             // If token response does not contain ID token, we should have returned an error response

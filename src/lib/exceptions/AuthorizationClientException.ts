@@ -15,10 +15,10 @@
  */
 
 import OAuthAgentException from './OAuthAgentException'
-import {Grant} from '../grant'
+import { Grant } from '../grant'
 
 export default class AuthorizationClientException extends OAuthAgentException {
-    
+
     // By default assume a configuration error
     public statusCode = 400
     public code = 'authorization_error'

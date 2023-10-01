@@ -14,10 +14,10 @@ class ConfigManager {
             error.logInfo = 'Could not retrieve config for the request'
             throw error
         }
-        
+
     }
 
-    private async getConfig(key:string): Promise<AppConfiguration> {
+    private async getConfig(key: string): Promise<AppConfiguration> {
         const result = await hgetallWithRetry(key);
         const config = AppConfiguration.create(result)
         if (!config) {

@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-import {Request, Response} from 'express'
-import {OAuthAgentException} from '../lib/exceptions';
+import { Request, Response } from 'express'
+import { OAuthAgentException } from '../lib/exceptions';
 
 export class RequestLog {
 
@@ -50,7 +50,7 @@ export class RequestLog {
             let stack = ''
             let logInfo = ''
             if (this.error) {
-                
+
                 logInfo = this.error.logInfo
                 if (this.error.stack) {
                     stack = this.error.stack
@@ -70,7 +70,7 @@ export class RequestLog {
                     }
                 }
             }
-            
+
             const fields: string[] = []
             this._addField(fields, this.time)
             this._addField(fields, this.method)

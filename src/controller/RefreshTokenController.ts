@@ -62,7 +62,7 @@ class RefreshTokenController {
                     await tokenPersistenceManager.saveTokensForSession({
                         idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
                         // TODO: handle refresh token null cases
-                        refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token) 
+                        refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token)
                     }, sessionId)
 
                     // set access token and session id cookies

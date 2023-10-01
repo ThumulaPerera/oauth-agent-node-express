@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-import {CookieSerializeOptions} from 'cookie'
+import { CookieSerializeOptions } from 'cookie'
 
 export class ServerConfiguration {
 

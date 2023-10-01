@@ -15,10 +15,10 @@
  */
 
 import { ServerConfiguration } from 'lib';
-import {CookieSerializeOptions} from 'cookie'
+import { CookieSerializeOptions } from 'cookie'
 
 export const serverConfig: ServerConfiguration = {
-    
+
     port: process.env.PORT || '8080',
     endpointsPrefix: '/auth',
     serverCertPath: process.env.SERVER_CERT_P12_PATH || '',
@@ -28,7 +28,7 @@ export const serverConfig: ServerConfiguration = {
 
     cookieNamePrefix: process.env.COOKIE_NAME_PREFIX || 'example',
     trustedWebOrigins: [process.env.TRUSTED_WEB_ORIGIN || 'http://www.example.local'],
-    corsEnabled: process.env.CORS_ENABLED ? process.env.CORS_ENABLED === 'true' : true,    
+    corsEnabled: process.env.CORS_ENABLED ? process.env.CORS_ENABLED === 'true' : true,
     cookieOptions: {
         httpOnly: true,
         sameSite: true,

@@ -148,7 +148,7 @@ export async function sendLoginRequest(): Promise<[number, setCookie.Cookie | un
 }
 
 export async function sendLoginCallback(state: string, cookie: setCookie.Cookie)
-        : Promise<[number, setCookie.Cookie[]]> {
+    : Promise<[number, setCookie.Cookie[]]> {
 
     const response = await request(app)
         .get(`/auth/login/callback?state=${state}&code=1234`)

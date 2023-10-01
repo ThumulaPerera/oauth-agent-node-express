@@ -69,11 +69,11 @@ export default async function exceptionMiddleware(
             code: exception.code,
             message: exception.message,
         });
-    
+
         response.redirect(errorRedirectUrl)
         return
-    } 
-        
+    }
+
     // Otherwise return the error as JSON
     const data = { code: exception.code, message: exception.message }
     response.status(exception.statusCode).send(data)

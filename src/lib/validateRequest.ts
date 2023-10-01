@@ -14,14 +14,14 @@
  *  limitations under the License.
  */
 
-import {UnauthorizedException} from './exceptions'
-import {decryptCookie} from './cookieEncrypter'
+import { UnauthorizedException } from './exceptions'
+import { decryptCookie } from './cookieEncrypter'
 
 export default function validateRequest(data: ValidateRequestData, options: ValidateRequestOptions) {
 
     if (options.requireTrustedOrigin) {
         if (data.allowedOrigins.findIndex((value) => value === data.originHeader) == -1) {
-            
+
             const error = new UnauthorizedException()
             error.logInfo = `The call is from an untrusted web origin: ${data.originHeader}`
             throw error
@@ -75,7 +75,7 @@ export class ValidateRequestOptions {
 
     public requireTrustedOrigin: boolean
     public requireCsrfHeader: boolean
-    
+
     public constructor() {
         this.requireTrustedOrigin = true
         this.requireCsrfHeader = true

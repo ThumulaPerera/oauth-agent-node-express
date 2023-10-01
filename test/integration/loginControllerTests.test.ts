@@ -334,14 +334,14 @@ describe('LoginControllerTests', () => {
             console.log(response.headers)
 
             assert.equal(response.status, 302, 'Incorrect HTTP status')
-            assert.equal(response.headers.location, testAppConfig.postLoginRedirectUrl, 
+            assert.equal(response.headers.location, testAppConfig.postLoginRedirectUrl,
                 'Incorrect post login redirect url')
 
             const cookies = parseCookieHeader(response.headers['set-cookie'])
 
             const tempLoginDataCookie = cookies.find((c) => c.name === 'auth_login')
             assert.isTrue(tempLoginDataCookie !== undefined, 'Missing temp login data unset cookie')
-            assert.isTrue(new Date(tempLoginDataCookie?.expires || "").getTime() < Date.now(), 
+            assert.isTrue(new Date(tempLoginDataCookie?.expires || "").getTime() < Date.now(),
                 'Temp login data cookie expiry time is incorrectly set')
 
             const accessTokenCookie = cookies.find((c) => c.name === 'auth_at')

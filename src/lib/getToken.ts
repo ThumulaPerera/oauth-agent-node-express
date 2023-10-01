@@ -15,9 +15,9 @@
  */
 
 import fetch from 'node-fetch'
-import {decryptCookie} from './cookieEncrypter'
-import {Grant} from './grant'
-import {ServerConfiguration} from './serverConfiguration'
+import { decryptCookie } from './cookieEncrypter'
+import { Grant } from './grant'
+import { ServerConfiguration } from './serverConfiguration'
 import AppConfiguration from './appConfiguration'
 import {
     OAuthAgentException,
@@ -27,8 +27,8 @@ import {
     AuthorizationServerException
 } from './exceptions'
 
-async function getTokenEndpointResponse(config: AppConfiguration, serverConfig: ServerConfiguration, code: string, 
-        state: string, tempLoginData: string | undefined | null, ): Promise<any> {
+async function getTokenEndpointResponse(config: AppConfiguration, serverConfig: ServerConfiguration, code: string,
+    state: string, tempLoginData: string | undefined | null,): Promise<any> {
     if (!tempLoginData) {
         return Promise.reject(new MissingTempLoginDataException())
     }
@@ -45,16 +45,16 @@ async function getTokenEndpointResponse(config: AppConfiguration, serverConfig: 
             {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Basic ' + Buffer.from(config.clientID+ ":" 
+                    'Authorization': 'Basic ' + Buffer.from(config.clientID + ":"
                         + config.clientSecret).toString('base64'),
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: 'grant_type=authorization_code&redirect_uri=' + config.redirectUri + '&code=' + code 
+                body: 'grant_type=authorization_code&redirect_uri=' + config.redirectUri + '&code=' + code
                     + '&code_verifier=' + parsedTempLoginData.codeVerifier
             })
 
         const text = await res.text()
-        
+
         if (res.status >= 500) {
             const error = new AuthorizationServerException()
             error.logInfo = `Server error response in an Authorization Code Grant: ${text}`
@@ -79,8 +79,7 @@ async function getTokenEndpointResponse(config: AppConfiguration, serverConfig: 
     }
 }
 
-async function refreshAccessToken(refreshToken: string, config: AppConfiguration): Promise<any>
-{
+async function refreshAccessToken(refreshToken: string, config: AppConfiguration): Promise<any> {
     try {
 
         const res = await fetch(
@@ -88,16 +87,16 @@ async function refreshAccessToken(refreshToken: string, config: AppConfiguration
             {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Basic ' + Buffer.from(config.clientID + ":" 
+                    'Authorization': 'Basic ' + Buffer.from(config.clientID + ":"
                         + config.clientSecret).toString('base64'),
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: 'grant_type=refresh_token&refresh_token='+refreshToken
+                body: 'grant_type=refresh_token&refresh_token=' + refreshToken
             })
-        
+
         // Read text if it exists
         const text = await res.text()
-        
+
         if (res.status >= 500) {
             const error = new AuthorizationServerException()
             error.logInfo = `Server error response in a Refresh Token Grant: ${text}`

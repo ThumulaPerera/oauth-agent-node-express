@@ -16,9 +16,9 @@
 
 import * as urlparse from 'url-parse'
 import AppConfiguration from './appConfiguration';
-import {generateHash, generateRandomString} from './pkce';
-import {AuthorizationRequestData} from './authorizationRequestData';
-import {AuthorizationResponseException, MissingStateException} from './exceptions'
+import { generateHash, generateRandomString } from './pkce';
+import { AuthorizationRequestData } from './authorizationRequestData';
+import { AuthorizationResponseException, MissingStateException } from './exceptions'
 
 export function createAuthorizationRequest(config: AppConfiguration): AuthorizationRequestData {
 
@@ -44,7 +44,7 @@ export async function handleAuthorizationResponse(pageUrl?: string): Promise<any
 
     const data = getUrlParts(pageUrl)
 
-    if (!data.state) {    
+    if (!data.state) {
         throw new MissingStateException()
     }
 
@@ -70,7 +70,7 @@ export async function handleAuthorizationResponse(pageUrl?: string): Promise<any
 }
 
 function getUrlParts(url?: string): any {
-    
+
     if (url) {
         const urlData = urlparse(url, true)
         if (urlData.query) {

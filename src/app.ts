@@ -7,7 +7,7 @@ import {
     LogoutController,
     RefreshTokenController
 } from './controller'
-import {serverConfig} from './serverConfig'
+import { serverConfig } from './serverConfig'
 import loggingMiddleware from './middleware/loggingMiddleware'
 import exceptionMiddleware from './middleware/exceptionMiddleware'
 

@@ -14,22 +14,22 @@
  *  limitations under the License.
  */
 
-import {CookieSerializeOptions, serialize} from 'cookie'
+import { CookieSerializeOptions, serialize } from 'cookie'
 import AppConfiguration from './appConfiguration'
-import {ServerConfiguration} from './serverConfiguration'
-import {getATCookieName, getSessionIdCookieName, getPlainIdTokenCookieName} from './cookieName'
+import { ServerConfiguration } from './serverConfiguration'
+import { getATCookieName, getSessionIdCookieName, getPlainIdTokenCookieName } from './cookieName'
 
 const DAY_MILLISECONDS = 1000 * 60 * 60 * 24
 
 function getCookiesForTokenResponse(tokenResponse: any, sessionId: string, serverConfig: ServerConfiguration)
-        : string[] {
+    : string[] {
 
     const cookies = []
 
-    const accessTokenCookie = 
-        serialize(getATCookieName(serverConfig.cookieNamePrefix), tokenResponse.access_token, 
+    const accessTokenCookie =
+        serialize(getATCookieName(serverConfig.cookieNamePrefix), tokenResponse.access_token,
             serverConfig.cookieOptions)
-    const sessionIdCookie = 
+    const sessionIdCookie =
         serialize(getSessionIdCookieName(serverConfig.cookieNamePrefix), sessionId, serverConfig.cookieOptions)
 
     cookies.push(accessTokenCookie, sessionIdCookie)

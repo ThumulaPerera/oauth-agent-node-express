@@ -16,8 +16,8 @@
 
 import * as crypto from 'crypto'
 import base64url from 'base64url';
-import {CookieSerializeOptions, serialize} from 'cookie'
-import {CookieDecryptionException, InvalidCookieException} from '../lib/exceptions'
+import { CookieSerializeOptions, serialize } from 'cookie'
+import { CookieDecryptionException, InvalidCookieException } from '../lib/exceptions'
 
 const VERSION_SIZE = 1;
 const GCM_IV_SIZE = 12;
@@ -25,7 +25,7 @@ const GCM_TAG_SIZE = 16;
 const CURRENT_VERSION = 1;
 
 function encryptCookie(encKeyHex: string, plaintext: string): string {
-    
+
     const ivBytes = crypto.randomBytes(GCM_IV_SIZE)
     const encKeyBytes = Buffer.from(encKeyHex, "hex")
 
@@ -33,18 +33,18 @@ function encryptCookie(encKeyHex: string, plaintext: string): string {
 
     const encryptedBytes = cipher.update(plaintext)
     const finalBytes = cipher.final()
-    
+
     const versionBytes = Buffer.from(new Uint8Array([CURRENT_VERSION]))
     const ciphertextBytes = Buffer.concat([encryptedBytes, finalBytes])
     const tagBytes = cipher.getAuthTag()
-    
+
     const allBytes = Buffer.concat([versionBytes, ivBytes, ciphertextBytes, tagBytes])
 
     return base64url.encode(allBytes)
 }
 
 function decryptCookie(encKeyHex: string, encryptedbase64value: string): string {
-    
+
     const allBytes = base64url.toBuffer(encryptedbase64value)
 
     const minSize = VERSION_SIZE + GCM_IV_SIZE + 1 + GCM_TAG_SIZE
@@ -69,18 +69,18 @@ function decryptCookie(encKeyHex: string, encryptedbase64value: string): string 
     const tagBytes = allBytes.slice(offset, allBytes.length)
 
     try {
-    
+
         const encKeyBytes = Buffer.from(encKeyHex, "hex")
         const decipher = crypto.createDecipheriv('aes-256-gcm', encKeyBytes, ivBytes)
         decipher.setAuthTag(tagBytes)
 
         const decryptedBytes = decipher.update(ciphertextBytes)
         const finalBytes = decipher.final()
-        
+
         const plaintextBytes = Buffer.concat([decryptedBytes, finalBytes])
         return plaintextBytes.toString()
 
-    } catch(e: any) {
+    } catch (e: any) {
 
         throw new CookieDecryptionException(e)
     }
