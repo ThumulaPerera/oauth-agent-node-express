@@ -112,7 +112,8 @@ describe('LogoutControllerTests', () => {
                 assert.equal(location.pathname, logoutEndpoint.pathname, 'Incorrect authorization endpoint')
                 assert.equal(location.searchParams.get('post_logout_redirect_uri'),
                     testAppConfig.oidcPostLogoutRedirectUri, 'Incorrect OIDC post logout redirect URI')
-                assert.equal(location.searchParams.get('id_token_hint'), tokenResponse.id_token, 'Incorrect ID token hint')
+                assert.equal(location.searchParams.get('id_token_hint'), tokenResponse.id_token,
+                    'Incorrect ID token hint')
 
                 const idTokenKey = `idtoken:${sessionIdCookie.value}`
                 const idTokenFromRedis = await redisClient.get(idTokenKey)
@@ -151,7 +152,8 @@ describe('LogoutControllerTests', () => {
                 assert.equal(location.pathname, logoutEndpoint.pathname, 'Incorrect authorization endpoint')
                 assert.equal(location.searchParams.get('post_logout_redirect_uri'),
                     testAppConfig.oidcPostLogoutRedirectUri, 'Incorrect OIDC post logout redirect URI')
-                assert.equal(location.searchParams.get('id_token_hint'), tokenResponse.id_token, 'Incorrect ID token hint')
+                assert.equal(location.searchParams.get('id_token_hint'), tokenResponse.id_token,
+                    'Incorrect ID token hint')
 
                 // verfiy cookies are cleared
                 const cookies = parseCookieHeader(response.headers['set-cookie'])
