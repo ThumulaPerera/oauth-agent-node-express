@@ -1,3 +1,4 @@
+// ref: https://khalilstemmler.com/blogs/typescript/eslint-for-typescript/
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
@@ -12,8 +13,11 @@
     "rules": {
         // TODO: this rule needs to be enabled
         "@typescript-eslint/no-explicit-any": "off",
-        "max-len": ["error", { 
-                "code": 120 
-            }]
+        "max-len": [
+            "error",
+            {
+                "code": 120
+            }
+        ]
     }
 }
