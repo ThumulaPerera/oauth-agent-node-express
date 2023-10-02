@@ -21,8 +21,6 @@ describe('ClaimsControllerTests', () => {
 
     describe('/userinfo endpoint tests', () => {
         it('should return 401 if session id cookie does not exist', async () => {
-            await redisClient.hmset('proxy-config#uuid1', testAppConfig)
-
             const response = await request(app)
                 .get('/auth/userinfo')
                 .set('X-Original-GW-Url', xOriginalGwUrl)

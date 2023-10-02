@@ -26,66 +26,77 @@ import {
     tokenPersistenceManager,
     encryptCookie
 } from '../lib'
-import { InvalidCookieException, AuthorizationClientException } from '../lib/exceptions'
+import { InvalidCookieException, AuthorizationClientException, InvalidSessionException } from '../lib/exceptions'
 import { asyncCatch } from '../middleware/exceptionMiddleware'
 
 class RefreshTokenController {
     public router = express.Router()
 
     constructor() {
-        this.router.post('/', asyncCatch(this.RefreshTokenFromCookie))
+        this.router.post('/', asyncCatch(this.refreshTokenFromCookie))
     }
 
     /* eslint-disable  @typescript-eslint/no-unused-vars */
-    RefreshTokenFromCookie = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    refreshTokenFromCookie = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
         const config = await configManager.getConfigForRequest(req)
 
-        // Check for an allowed origin and the presence of a CSRF token
-        // const options = new ValidateRequestOptions()
-        // validateExpressRequest(req, options, config, serverConfig)
+        const sessionIdCookieName = getSessionIdCookieName(serverConfig.cookieNamePrefix)
+        const sessionId = req.cookies[sessionIdCookieName]
+
+        if (!sessionId) {
+            const error = new InvalidCookieException()
+            error.logInfo = 'No session ID cookie was supplied in a in a token refresh call'
+            throw error
+        }
+
+        let savedTokens
+        try {
+            savedTokens = await tokenPersistenceManager.getTokens(sessionId)
+        } catch (e) {
+            // TODO: handle other errors that maybe thrown by redis client
+            const error = new InvalidSessionException(e as Error)
+            error.logInfo = 'Could not retrieve tokens for the session id supplied in a claims call'
+            throw error
+        }
+
+        if (!savedTokens.refreshToken) {
+            const error = new InvalidSessionException()
+            error.logInfo = 'Could not retrieve refresh token for the session id supplied in a claims call'
+            throw error
+        }
 
         let refreshToken
-
-        const sessionIdCookieName = getSessionIdCookieName(serverConfig.cookieNamePrefix)
-        if (req.cookies && req.cookies[sessionIdCookieName]) {
-            const sessionId = req.cookies[sessionIdCookieName]
-            const savedTokens = await tokenPersistenceManager.getTokens(sessionId)
-            if (savedTokens && savedTokens.refreshToken) {
-                refreshToken = decryptCookie(serverConfig.encKey, savedTokens.refreshToken)
-                try {
-                    const tokenResponse = await refreshAccessToken(refreshToken, config)
-                    if (tokenResponse.id_token) {
-                        validateIDtoken(config, tokenResponse.id_token)
-                    }
-
-                    await tokenPersistenceManager.saveTokensForSession({
-                        idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
-                        // TODO: handle refresh token null cases
-                        refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token)
-                    }, sessionId)
-
-                    // set access token and session id cookies
-                    const cookies = getCookiesForTokenResponse(tokenResponse, sessionId, serverConfig)
-
-                    res.set('Set-Cookie', cookies)
-                    res.status(204).send()
-                } catch (e) {
-                    if (e instanceof AuthorizationClientException) {
-                        tokenPersistenceManager.deleteTokens(sessionId)
-                    }
-                    // this error will be caught by the exception middleware and cookies will be cleared
-                    throw e
-                }
-            } else {
-                const error = new InvalidCookieException()
-                error.logInfo = 'No refresh token was found for the session id supplied in a token refresh call'
-                throw error
-            }
-        } else {
-            const error = new InvalidCookieException()
-            error.logInfo = 'No session id cookie was supplied in a token refresh call'
+        try {
+            refreshToken = decryptCookie(serverConfig.encKey, savedTokens.refreshToken)
+        } catch (e) {
+            const error = new InvalidSessionException(e as Error)
+            error.logInfo = 'Could not decrypt refresh token for the session id supplied in a claims call'
             throw error
+        }
+
+        try {
+            const tokenResponse = await refreshAccessToken(refreshToken, config)
+            
+            validateIDtoken(config, tokenResponse.id_token)
+
+            await tokenPersistenceManager.saveTokensForSession({
+                idToken: encryptCookie(serverConfig.encKey, tokenResponse.id_token),
+                // TODO: handle refresh token null cases
+                refreshToken: encryptCookie(serverConfig.encKey, tokenResponse.refresh_token)
+            }, sessionId)
+
+            // set access token and session id cookies
+            const cookies = getCookiesForTokenResponse(tokenResponse, sessionId, serverConfig)
+
+            res.set('Set-Cookie', cookies)
+            res.status(204).send()
+        } catch (e) {
+            if (e instanceof AuthorizationClientException) {
+                tokenPersistenceManager.deleteTokens(sessionId)
+                // this error will be caught by the exception middleware and cookies will be cleared
+            }
+            throw e
         }
     }
 }
